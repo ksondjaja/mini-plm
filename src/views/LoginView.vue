@@ -1,8 +1,12 @@
 <template>
     <div class="login">
         <section class="forms">
+
+            <!-- <p v-model="print" /> -->
+
             <form class="register" @submit.prevent="register">
                 <h2>Register</h2>
+
                 <input
                     type="email"
                     placeholder="Email Address"

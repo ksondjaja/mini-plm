@@ -9,14 +9,21 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+const apiKey = process.env.VUE_APP_FIREBASE_AUTH_API_KEY;
+const messagingSenderId = process.env.VUE_APP_FIREBASE_AUTH_MESSAGING_SENDER_ID;
+const appId = process.env.VUE_APP_FIREBASE_AUTH_APP_ID;
+const measurementId = process.env.VUE_APP_FIREBASE_AUTH_MEASUREMENT_ID;
+
+
 const firebaseConfig = {
-  apiKey: "AIzaSyACJs-jXef_dRaeM6lCy7QLC9-lv6sItfo",
+  apiKey: apiKey,
   authDomain: "mini-plm.firebaseapp.com",
   projectId: "mini-plm",
   storageBucket: "mini-plm.appspot.com",
-  messagingSenderId: "321713285562",
-  appId: "1:321713285562:web:13ecbc8220fb3f9e911583",
-  measurementId: "G-S73DKD1T6W"
+  messagingSenderId: messagingSenderId,
+  appId: appId,
+  measurementId: measurementId
 };
 
 // Initialize Firebase
