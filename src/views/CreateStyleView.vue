@@ -2,7 +2,7 @@
     <div class="new-style">
       <h1>Create New Style</h1>
 
-      <form class="create-style" @submit.prevent="createStyle">
+      <form class="create-style" @submit="postData" method="post">
 
                 <input
                     type="text"
@@ -49,11 +49,13 @@
   </template>
 
 <script>
+import axios from 'axios';
+
 import { ref } from 'vue';
 import { useStore } from 'vuex';
 
 export default {
-    setup () {
+    data(){
         const create_style_form = ref({});
         const store = useStore();
 
@@ -65,7 +67,26 @@ export default {
             create_style_form,
             createStyle
         }
+    },
+    methods:{
+        postData(e){
+            axios.post("localhost:3000/api/v1/styles/", this.postData);
+            e.preventDefault();
+        }
     }
+    // setup () {
+    //     const create_style_form = ref({});
+    //     const store = useStore();
+
+    //     const createStyle = () => {
+    //         store.dispatch('create_style', create_style_form.value);
+    //     }
+
+    //     return{
+    //         create_style_form,
+    //         createStyle
+    //     }
+    // }
 }
 </script>
 
