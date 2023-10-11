@@ -1,8 +1,5 @@
 var AWS = require('aws-sdk');
 
-console.log(process.env.VUE_APP_AWS_ACCESS_KEY);
-console.log(process.env.VUE_APP_AWS_SECRET_ACCESS_KEY);
-
 AWS.config.update({
     apiVersion: 'latest',
     accessKeyId: process.env.VUE_APP_AWS_ACCESS_KEY,

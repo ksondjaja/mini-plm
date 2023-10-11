@@ -70,7 +70,13 @@ export default {
     },
     methods:{
         postData(e){
-            axios.post("localhost:3000/api/v1/styles/", this.postData);
+            axios.post("http://localhost:3000/api/v1/styles/", this.postData)
+                .then(res => {
+                    console.log(res);
+                }).catch(err => {
+                    console.log(err.response);
+                }
+            );
             e.preventDefault();
         }
     }
