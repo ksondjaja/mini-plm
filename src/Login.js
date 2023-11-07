@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from "./backend/firebase/firebase";
-import {  createUserWithEmailAndPassword  } from 'firebase/auth';
+import {  signInWithEmailAndPassword  } from 'firebase/auth';
 import { Layout } from "core";
 import {
     Grid,
@@ -27,12 +27,13 @@ function Login(props) {
     const onSubmit = async (e) => {
         e.preventDefault()
        
-        await createUserWithEmailAndPassword(auth, state.email, state.password)
+        await signInWithEmailAndPassword(auth, state.email, state.password)
           .then((userCredential) => {
               // Signed in
               const user = userCredential.user;
-              console.log(user);
-              navigate("/login")
+              console.log(state.email +' is logged in');
+              props.logIn()
+              navigate("/home")
               // ...
           })
           .catch((error) => {

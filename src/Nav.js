@@ -4,6 +4,7 @@ import { styled as styledMUI } from "@mui/system";
 import {
     AppBar,
     Box,
+    Button,
     Toolbar,
     Grid,
     IconButton,
@@ -16,6 +17,8 @@ import {
 
 
 const Nav = props => {
+    const { state, logOut } = props;
+
     const MUIAppBar = styledMUI(AppBar)({
         padding: "1%"
     })
@@ -30,9 +33,19 @@ const Nav = props => {
                             alignItems="center"
                             justifyContent="flex-start"
                         >
-                            <Grid item>
+                            <Grid item xs={11}>
                                 <Typography variant="h3">mini-plm</Typography>
                             </Grid>
+                            {state.loggedIn &&
+                                <Grid item xs={1}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={logOut}
+                                    >
+                                        Logout
+                                    </Button>
+                                </Grid>
+                            }
                         </Grid>
                     </Toolbar>
                 </MUIAppBar>
