@@ -5,15 +5,18 @@ import {
   Navigate
 } from "react-router-dom";
 import Nav from "./Nav";
-import Login from './Login';
-import Home from './Home';
+import Login from './pages/Login';
+import Home from './pages/Home';
 
 export class App extends React.Component {
   constructor(props) {
     super(props);
 
+    //Change login to NOT use loggedIn state, but persistent login with Firebase + JWT-based Cookies
+    //https://firebase.google.com/docs/auth/admin/manage-cookies
+    //Create separate function to handle all login/logout (not just in login page?)
+
     this.state = {
-      loggedIn: false,
     };
 
     this.logIn = event => {

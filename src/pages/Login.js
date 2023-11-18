@@ -1,7 +1,10 @@
-import * as React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { auth } from "./backend/firebase/firebase";
-import {  signInWithEmailAndPassword  } from 'firebase/auth';
+// https://www.youtube.com/watch?v=Jfkme6WE_Dk&ab_channel=DailyWebCoding
+// continue from 14:30
+
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../backend/firebase/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Layout } from "core";
 import {
     Grid,
@@ -20,30 +23,46 @@ function Login(props) {
     const navigate = useNavigate()
     
     const { state, handleStateChange } = props;
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [token, setToken] = useState('');
 
     const handleClickShowPassword = () => { setShowPassword(!showPassword)};
 
     const onSubmit = async (e) => {
         e.preventDefault()
-       
+
         await signInWithEmailAndPassword(auth, state.email, state.password)
-          .then((userCredential) => {
+          .then((userCred) => {
               // Signed in
-              const user = userCredential.user;
-              console.log(state.email +' is logged in');
-              props.logIn()
-              navigate("/home")
-              // ...
+              console.log(userCred);
+              
+              // Temporary login by setting loggedIn state to true
+              if(userCred){
+                props.logIn()
+              }
+
+              navigate("/home");
           })
           .catch((error) => {
               const errorCode = error.code;
               const errorMessage = error.message;
               console.log(errorCode, errorMessage);
-              // ..
           });
 
-      }
+    }
+
+    // Temporary solution for persistent login
+    useEffect(()=>{
+        auth.onAuthStateChanged((userCred) => {
+            if(userCred){
+                props.logIn()
+                userCred.getIdToken().then((token)=>{
+                    console.log(token);
+                    setToken(token);
+                })
+            }
+        })}
+    ,[])
 
     return (
       <Layout>
