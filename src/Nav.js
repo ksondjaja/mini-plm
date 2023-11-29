@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 
 
-const Nav = props => {
+function Nav(props) {
     const { state, logOut } = props;
 
     const MUIAppBar = styledMUI(AppBar)({

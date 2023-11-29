@@ -1,11 +1,4 @@
-// https://www.youtube.com/watch?v=Jfkme6WE_Dk&ab_channel=DailyWebCoding
-// continue from 14:30
-
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth } from '../backend/firebase/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Layout } from "core";
+import { useState } from 'react';
 import {
     Grid,
     Typography,
@@ -20,52 +13,12 @@ import {
     } from '@mui/icons-material/';
 
 function Login(props) {
-    const navigate = useNavigate()
-    
-    const { state, handleStateChange } = props;
     const [showPassword, setShowPassword] = useState(false);
-    const [token, setToken] = useState('');
 
     const handleClickShowPassword = () => { setShowPassword(!showPassword)};
 
-    const onSubmit = async (e) => {
-        e.preventDefault()
-
-        await signInWithEmailAndPassword(auth, state.email, state.password)
-          .then((userCred) => {
-              // Signed in
-              console.log(userCred);
-              
-              // Temporary login by setting loggedIn state to true
-              if(userCred){
-                props.logIn()
-              }
-
-              navigate("/home");
-          })
-          .catch((error) => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              console.log(errorCode, errorMessage);
-          });
-
-    }
-
-    // Temporary solution for persistent login
-    useEffect(()=>{
-        auth.onAuthStateChanged((userCred) => {
-            if(userCred){
-                props.logIn()
-                userCred.getIdToken().then((token)=>{
-                    console.log(token);
-                    setToken(token);
-                })
-            }
-        })}
-    ,[])
-
-    return (
-      <Layout>
+    return(
+    <>
         <Typography variant="h3">
             User Login
         </Typography>
@@ -84,8 +37,8 @@ function Login(props) {
                         label="Email"
                         name="email"
                         type="text"
-                        value={state.email}
-                        onChange={handleStateChange}
+                        value={props.state.email}
+                        onChange={props.handleStateChange}
                     />
                 </Grid>
                 <Grid item>
@@ -94,8 +47,8 @@ function Login(props) {
                         id="Password"
                         label="Password"
                         name="password"
-                        value={state.password}
-                        onChange={handleStateChange}
+                        value={props.state.password}
+                        onChange={props.handleStateChange}
                         type={showPassword ? 'text' : 'password'}
                         InputProps={{
                             endAdornment: (
@@ -113,12 +66,12 @@ function Login(props) {
                     />
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" type="submit" onClick={onSubmit}>Login</Button>
+                    <Button variant="contained" type="submit" onClick={props.onSubmit}>Login</Button>
                 </Grid>
             </Grid>
         </form>
-      </Layout>
-    );
-  }
-  
-  export default Login;
+    </>
+    )
+}
+
+export default Login;

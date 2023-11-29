@@ -1,7 +1,4 @@
-// use API with Axios tutorial: https://www.youtube.com/watch?v=NqdqnfzOQFE&ab_channel=DaveGray
-
-// LOCAL JSON SERVER FOR TESTING tutorial: https://www.youtube.com/watch?v=_j3yiadVGQA&ab_channel=CodeWithYousaf
-// COMMAND TO RUN LOCAL SERVER: npx json-server --watch db.json --port 3001
+//NOT BEING USED DUE TO PASSING TOKEN IN Home.js
 
 import axios from 'axios';
 const BASE_URL = process.env.REACT_APP_BACKEND_URL;

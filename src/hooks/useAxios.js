@@ -1,4 +1,4 @@
-// Axios setup tutorial from https://www.youtube.com/watch?v=NqdqnfzOQFE&ab_channel=DaveGray
+//NOT BEING USED DUE TO PASSING TOKEN IN Home.js
 
 import { useState, useEffect } from "react";
 
