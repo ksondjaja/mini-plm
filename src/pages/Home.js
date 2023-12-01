@@ -1,7 +1,5 @@
 // use API tutorial: https://www.youtube.com/watch?v=NqdqnfzOQFE&ab_channel=DaveGray
 // Axios setup tutorial from https://www.youtube.com/watch?v=NqdqnfzOQFE&ab_channel=DaveGray
-// LOCAL JSON SERVER FOR TESTING tutorial: https://www.youtube.com/watch?v=_j3yiadVGQA&ab_channel=CodeWithYousaf
-// COMMAND TO RUN LOCAL SERVER: npx json-server --watch db.json --port 3001
 
 
 import { useState, useEffect } from "react";
@@ -17,7 +15,9 @@ import {
 } from '@mui/material';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-function Home(props, { token }) {
+function Home( props ) {
+
+    const { token } = props;
 
     const [response, setResponse] = useState([]);
     const [error, setError] = useState('');
@@ -29,15 +29,17 @@ function Home(props, { token }) {
         
         const fetchData = async () => {
             try {
-                const res = await axios.get(BACKEND_URL, {
-                    headers: {
-                        Authorization: 'Bearer' + token
+                const res = await axios.get(BACKEND_URL,
+                    {
+                        headers: {
+                            Authorization: 'Bearer' + token
+                        }
                     }
-                });
-                console.log(res);
+                );
+                console.log('Response: ' + res.data);
                 setResponse(res.data);
             } catch(err){
-                console.log(err.message);
+                console.log('Error: ' + err.message);
                 setError(err.message);
             } finally {
                 setLoading(false);

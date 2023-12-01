@@ -5,7 +5,7 @@
 // https://www.youtube.com/watch?v=Jfkme6WE_Dk&ab_channel=DailyWebCoding
 // continue from 27:14 to work on backend/Express
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Nav from "./Nav";
 import Auth from './pages/Auth';
 

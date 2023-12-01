@@ -21,8 +21,7 @@ function Auth(props) {
 
     await signInWithEmailAndPassword(auth, props.state.email, props.state.password)
       .then((userCred) => {
-          // Signed in
-          console.log(userCred);
+          // console.log('User Cred: ' + userCred);
           
           // Temporary login by setting loggedIn state to true
           if(userCred){
@@ -46,7 +45,7 @@ function Auth(props) {
               props.logIn()
                 window.localStorage.setItem("auth", "true")
                 userCred.getIdToken().then((token)=>{
-                    console.log(token);
+                    // console.log('Token: '+token);
                     props.setToken(token);
                 })
             }

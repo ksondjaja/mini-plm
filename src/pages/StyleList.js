@@ -15,7 +15,10 @@ function StyleList(props) {
             {!props.loading && !props.error && !props.style && <p>No Styles in Database</p>}
 
             {!props.loading && !props.error && props.style &&
-                props.style.map((s, i) => (
+
+                // <p>{props.style}</p>
+
+                props.style["Styles"].map((s, i) => (
                 <Grid item key={i} xs={4} textAlign="left">
                     <Box border={2} padding={2}>
                         <Typography variant="h5">
