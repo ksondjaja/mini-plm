@@ -24,28 +24,28 @@ function Home( props ) {
     const [loading, setLoading] = useState(true);
 
 
-    useEffect(()=>{
-        const controller = new AbortController();
+    const controller = new AbortController();
         
-        const fetchData = async () => {
-            try {
-                const res = await axios.get(BACKEND_URL,
-                    {
-                        headers: {
-                            Authorization: 'Bearer' + token
-                        }
+    const fetchData = async () => {
+        try {
+            const res = await axios.get(BACKEND_URL,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
                     }
-                );
-                console.log('Response: ' + res.data);
-                setResponse(res.data);
-            } catch(err){
-                console.log('Error: ' + err.message);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+                }
+            );
+            console.log('Response: ' + JSON.stringify(res.data) );
+            setResponse(res.data);
+        } catch(err){
+            console.log('Error: ' + err.message);
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
+    }
 
+    useEffect(()=>{
         if(token){
             fetchData();
         }
@@ -75,8 +75,10 @@ function Home( props ) {
             </Grid>
 
             <StyleList 
-                style={response}
-                {...props}
+                response = {response}
+                token = {props.token}
+                loading = {loading}
+                error = {error}
             />
             
         </Layout>

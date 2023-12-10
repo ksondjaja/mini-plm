@@ -5,7 +5,7 @@ import {
     Navigate,
     useNavigate
   } from "react-router-dom";
-import { auth } from '../backend/firebase/firebase';
+import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Layout } from "core";
 import Home from './Home';

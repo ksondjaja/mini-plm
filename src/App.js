@@ -5,9 +5,20 @@
 // https://www.youtube.com/watch?v=Jfkme6WE_Dk&ab_channel=DailyWebCoding
 // continue from 27:14 to work on backend/Express
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate
+} from "react-router-dom";
+import { auth } from './firebase';
+import { signOut, signInWithEmailAndPassword } from "firebase/auth";
+import { Layout } from "core";
 import Nav from "./Nav";
-import Auth from './pages/Auth';
+import Home from './pages/Home';
+import Login from './pages/Login';
+
 
 function App (props) {
 
@@ -19,19 +30,55 @@ function App (props) {
   const [token, setToken] = useState('');
 
 
-  const logIn = event => {
+  const logIn = e => {
       setState({
         ...state,
         loggedIn: true
       });
-    }
+  }
 
-  const logOut = event => {
+  const navigate = useNavigate()
+
+  const onSubmit = async (e) => {
+    e.preventDefault()
+
+    await signInWithEmailAndPassword(auth, state.email, state.password)
+      .then((userCred) => {
+          // console.log('User Cred: ' + userCred);
+          
+          // Temporary login by setting loggedIn state to true
+          if(userCred){
+            logIn()
+            window.localStorage.setItem("auth", "true")
+          }
+
+          navigate("/home");
+      })
+      .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode, errorMessage);
+      });
+  }
+
+  const logOut = async(e) => {
+    e.preventDefault();
+
+    signOut(auth).then(() => {
+
+      window.localStorage.removeItem("auth");
+
       setState({
         ...state,
         loggedIn: false
       });
-    }
+    }).catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+ 
+  }
 
   const handleStateChange = event => {
       const value = event.target.value;
@@ -52,11 +99,66 @@ function App (props) {
     handleStateChange
   }
 
+  // Temporary solution for persistent login
+  useEffect(()=>{
+    auth.onAuthStateChanged((userCred) => {
+        if(userCred){
+          logIn();
+          window.localStorage.setItem("auth", "true");
+          userCred.getIdToken().then((token)=>{
+              // console.log('Token: '+token);
+              setToken(token);
+          })
+          navigate("/home");
+        }
+    })}
+  ,[])
+
   return (
     <>
       <Nav {...props}/>
 
-      <Auth {...props}/>
+      <Layout>
+
+        <Routes>
+          <Route path="/"
+            element={
+                state.loggedIn ?
+                  <Navigate to="/home"/>
+                : 
+                  <Navigate to="/login"/>
+              }
+          />
+
+          <Route
+            exact path="/login"
+            element={
+              state.loggedIn?
+                <Navigate to="/home"/>
+              :
+                <Login
+                  onSubmit = {onSubmit}
+                  {...props}
+                />
+            }
+          />
+
+          <Route
+            exact path="/home"
+            element={
+              state.loggedIn ?
+                <Home
+                  token={token}
+                  {...props}
+                />
+              :
+                <Navigate to="/login"/>
+            }
+          />
+        </Routes>
+
+        
+      </Layout>
     </>
   )
 };

@@ -2,6 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const middleware = require('../middleware');
 
 const db = require('../../db.json');
 
@@ -10,7 +11,11 @@ const port = 8000;
 
 app.use(cors());
 
-app.get('/api/styles', (req, res)=>{
+app.use(middleware.decodeToken);
+
+app.get('/api/', (req, res)=>{
+    console.log('LOAD DB');
+    
     return res.json(db);
 })
 
