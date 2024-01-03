@@ -35,7 +35,7 @@ function StylePage( props ) {
                 <Grid container mb={3}>
                     <Grid item xs={6}>
                         <Typography variant="h6" color="primary">
-                            {styleDetails.Category}   {styleDetails.Season}
+                            {styleDetails.Category}   {styleDetails.Season}   {styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''}
                         </Typography>
                     </Grid>
                 </Grid>

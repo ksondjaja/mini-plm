@@ -13,6 +13,9 @@ router.use(express.json())
 router.get('/', async (req, res) => {
     try {
         const styles = await getStylesPreview();
+
+        console.log(styles);
+
         res.json(styles);
     } catch (err) {
         console.error(err);

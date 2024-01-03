@@ -26,7 +26,8 @@ function App (props) {
 
   const [state, setState] = useState(
       {
-          loggedIn: false || window.localStorage.getItem('auth')==='true'
+          loggedIn: false || window.localStorage.getItem('auth')==='true',
+          email: window.localStorage.getItem('mini-plm-user')
       }
   )
   const [token, setToken] = useState('');
@@ -35,7 +36,7 @@ function App (props) {
   const logIn = e => {
       setState({
         ...state,
-        loggedIn: true
+        loggedIn: true,
       });
   }
 
@@ -52,6 +53,7 @@ function App (props) {
           if(userCred){
             logIn()
             window.localStorage.setItem("auth", "true")
+            window.localStorage.setItem("mini-plm-user", state.email)
           }
 
           navigate("/home");
@@ -69,6 +71,7 @@ function App (props) {
     signOut(auth).then(() => {
 
       window.localStorage.removeItem("auth");
+      window.localStorage.removeItem("mini-plm-user");
 
       setState({
         ...state,

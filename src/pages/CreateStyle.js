@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
 import { Layout } from "core";
 import {
     Grid,
@@ -79,12 +80,20 @@ function CreateStyle( props ) {
 
 
     const handleNewStyleChange = event => {
-        const value = event.target.value;
+        const value = event.target.value
   
         setNewStyle({
           ...newStyle,
           [event.target.name]: value
         });
+    }
+
+    const handleDatePickerChange = (value, name) => {
+
+        setNewStyle({
+            ...newStyle,
+            [name]: value
+        })
     }
 
     const handleSubmitNewStyle = event => {
@@ -128,10 +137,11 @@ function CreateStyle( props ) {
                         <DemoContainer components={['DatePicker']}>
                             <DatePicker
                                 id="delivery-date"
-                                name="DeliveryDate"
                                 label='Delivery Date'
-                                // value={newStyle.DeliveryDate}
-                                // onChange={handleNewStyleChange}
+                                name='DeliveryDate'
+                                views={['year', 'month', 'day']}
+                                value={newStyle.DeliveryDate?? dayjs()}
+                                onChange={(newDate)=>handleDatePickerChange(newDate, 'DeliveryDate')}
                                 fullWidth
                                 required
                             />
@@ -228,7 +238,7 @@ function CreateStyle( props ) {
                         id="style-name"
                         label="Style Name"
                         name="StyleName"
-                        value={newStyle.StyleName}
+                        value={newStyle.StyleName?? ''}
                         onChange={handleNewStyleChange}
                         fullWidth
                         required

@@ -77,7 +77,7 @@ function StyleList(props) {
                                 </Typography>
 
                                 <Typography variant="body1">
-                                    <b>Season:</b> {s.Season}
+                                    <b>Season:</b> {s.Season} {s.DeliveryDate? JSON.stringify(s.DeliveryDate).slice(1,5) : ''}
                                 </Typography>
 
                                 <Typography variant="body1">

@@ -20,7 +20,7 @@ const TABLE_STYLES = "mini-plm-styles";
 const getStylesPreview = async () => {
     const params = {
         TableName: TABLE_STYLES,
-        AttributesToGet: ["StyleId", "StyleName", "Season", "Category"]
+        AttributesToGet: ["StyleId", "StyleName", "Season", "Category", "DeliveryDate"]
     }
 
     const styles = await dynamoClient.scan(params).promise();
