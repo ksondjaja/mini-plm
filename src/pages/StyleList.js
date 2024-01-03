@@ -14,11 +14,19 @@ function StyleList(props) {
             {!props.loading && props.error && <p>{props.error}</p>}
             {!props.loading && !props.error && !props.response && <p>No Styles in Database</p>}
             {!props.loading && !props.error && props.response && !props.token && <p>Missing Token</p>}
-            {!props.loading && !props.error && props.response && props.token &&
 
-                //<p>{props.style}</p>
+            {!props.loading && !props.error && props.response && props.token && (props.response === undefined) &&
+                <p>Data object type error</p>
+            }
 
-                props.response["Styles"].map(s => (
+            {/* {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
+            
+                <p>{props.response["Items"]}</p>
+            } */}
+
+            {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
+
+                props.response["Items"].map(s => (
                 <Grid item key={s.StykeId} xs={4} textAlign="left">
                     <Box border={2} padding={2}>
                         <Typography variant="h5">
@@ -32,10 +40,7 @@ function StyleList(props) {
                         </Typography>
                     </Box>
                 </Grid>
-                ))
-
-                //<></>
-            
+                ))       
                 
             }
             

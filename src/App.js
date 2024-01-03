@@ -18,6 +18,7 @@ import { Layout } from "core";
 import Nav from "./Nav";
 import Home from './pages/Home';
 import Login from './pages/Login';
+import CreateStyle from './pages/CreateStyle';
 
 
 function App (props) {
@@ -39,7 +40,7 @@ function App (props) {
 
   const navigate = useNavigate()
 
-  const onSubmit = async (e) => {
+  const onSubmitLogIn = async (e) => {
     e.preventDefault()
 
     await signInWithEmailAndPassword(auth, state.email, state.password)
@@ -137,7 +138,7 @@ function App (props) {
                 <Navigate to="/home"/>
               :
                 <Login
-                  onSubmit = {onSubmit}
+                  onSubmitLogIn = {onSubmitLogIn}
                   {...props}
                 />
             }
@@ -152,6 +153,20 @@ function App (props) {
                   {...props}
                 />
               :
+                <Navigate to="/login"/>
+            }
+          />
+
+          <Route
+            exact path="/createstyle"
+            element={
+              state.loggedIn ?
+                <CreateStyle
+                  handleStateChange = {handleStateChange}
+                  token={token}
+                  {...props}
+                />
+                :
                 <Navigate to="/login"/>
             }
           />

@@ -66,7 +66,7 @@ function Login(props) {
                     />
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" type="submit" onClick={props.onSubmit}>Login</Button>
+                    <Button variant="contained" type="submit" onClick={props.onSubmitLogIn}>Login</Button>
                 </Grid>
             </Grid>
         </form>

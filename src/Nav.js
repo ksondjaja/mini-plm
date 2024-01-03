@@ -1,5 +1,4 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
 import { styled as styledMUI } from "@mui/system";
 import {
     AppBar,
@@ -9,6 +8,7 @@ import {
     Grid,
     IconButton,
     Typography,
+    Link,
     Menu,
     MenuItem,
     Fade,
@@ -34,7 +34,13 @@ function Nav(props) {
                             justifyContent="flex-start"
                         >
                             <Grid item xs={11}>
-                                <Typography variant="h3">mini-plm</Typography>
+                                {state.loggedIn?
+                                    <Link href="/home" variant="h3" color="inherit" underline="none">
+                                        mini-plm
+                                    </Link>
+                                    :
+                                    <Typography variant="h3">mini-plm</Typography>
+                                }
                             </Grid>
                             {state.loggedIn &&
                                 <Grid item xs={1}>

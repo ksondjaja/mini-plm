@@ -3,6 +3,7 @@
 
 
 import { useState, useEffect } from "react";
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Layout } from "core";
 import StyleList from "pages/StyleList";
@@ -13,7 +14,7 @@ import {
     Typography,
     Button
 } from '@mui/material';
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
 function Home( props ) {
 
@@ -28,7 +29,7 @@ function Home( props ) {
         
     const fetchData = async () => {
         try {
-            const res = await axios.get(BACKEND_URL,
+            const res = await axios.get(BACKEND_URL_STYLES,
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
@@ -38,8 +39,8 @@ function Home( props ) {
             console.log('Response: ' + JSON.stringify(res.data) );
             setResponse(res.data);
         } catch(err){
-            console.log('Error: ' + err.message);
-            setError(err.message);
+            console.log('Error: ' + JSON.stringify(err.message));
+            setError(JSON.stringify(err.message));
         } finally {
             setLoading(false);
         }
@@ -57,9 +58,16 @@ function Home( props ) {
     return (
         <Layout>
             <Grid container spacing={3} textAlign="center">
-                <Typography variant="h2">
-                    Hello {props.state.email}
-                </Typography>
+                <Grid item mb={3}>
+                    <Typography variant="h2">
+                        Hello {props.state.email}
+                        {/* 
+                            props.state.email resets to blank when window is refreshed.
+                            Should replace with localstorage or something
+                            Maybe also make a database to map user email to name, user type/role/access
+                        */}
+                    </Typography>
+                </Grid>
             </Grid>
             <Grid container spacing={3} my={4} display="flex" justifyItems="stretch" alignItems="center">
                 <Grid item xs={9}>
@@ -71,6 +79,13 @@ function Home( props ) {
                 </Grid>
                 <Grid item xs={3}>
                     <Button variant="contained">Search</Button>
+                </Grid>
+            </Grid>
+            <Grid container spacing={3} mb={3} justifyItems="flex-start">
+                <Grid item xs={3}>
+                    <Button component={Link} to="/createstyle" variant="outlined">
+                        Create New Style
+                    </Button>
                 </Grid>
             </Grid>
 
