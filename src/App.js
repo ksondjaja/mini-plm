@@ -16,9 +16,10 @@ import { auth } from './firebase';
 import { signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { Layout } from "core";
 import Nav from "./Nav";
-import Home from './pages/Home';
 import Login from './pages/Login';
+import Home from './pages/Home';
 import CreateStyle from './pages/CreateStyle';
+import StylePage from './pages/StylePage';
 
 
 function App (props) {
@@ -29,7 +30,7 @@ function App (props) {
       }
   )
   const [token, setToken] = useState('');
-
+  const [currentStyle, setCurrentStyle] = useState();
 
   const logIn = e => {
       setState({
@@ -150,6 +151,7 @@ function App (props) {
               state.loggedIn ?
                 <Home
                   token={token}
+                  setCurrentStyle={setCurrentStyle}
                   {...props}
                 />
               :
@@ -168,8 +170,23 @@ function App (props) {
                 />
                 :
                 <Navigate to="/login"/>
-            }
-          />
+              }
+            />
+
+            <Route
+              exact path="/stylepage"
+              element={
+                state.loggedIn ?
+                  <StylePage
+                    token={token}
+                    currentStyle={currentStyle}
+                    {...props}
+                  />
+                :
+                  <Navigate to="/login"/>
+              }
+            />
+
         </Routes>
 
         

@@ -2,9 +2,7 @@
 // Add other data attributes
 
 import { useState } from 'react';
-import {
-    useNavigate
-  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Layout } from "core";
 import {
@@ -22,11 +20,12 @@ import {
     LocalizationProvider,
     DatePicker
 } from '@mui/x-date-pickers/';
+
 function CreateStyle( props ) {
 
     const { token } = props;
 
-    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES + '/add';
+    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
     const navigate = useNavigate()
 
@@ -55,13 +54,12 @@ function CreateStyle( props ) {
     const submitStyleData = async () => {
         try {
             const res = await axios.post(
-                BACKEND_URL_STYLES, 
+                (BACKEND_URL_STYLES + '/add'), 
                 newStyle,
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
-                    },
-                    
+                    }
                 }
             );
             

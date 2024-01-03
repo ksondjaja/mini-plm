@@ -2,7 +2,7 @@
 
 const express = require('express');
 
-const { getStyles, getStyleById, addStyle } = require('../config/dynamodb');
+const { getStylesPreview, getStyleById, addStyle } = require('../config/dynamodb');
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.use(express.json())
 // api endpoint to get all Styles
 router.get('/', async (req, res) => {
     try {
-        const styles = await getStyles();
+        const styles = await getStylesPreview();
         res.json(styles);
     } catch (err) {
         console.error(err);
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 // api endpoint to get Style by StyleId
 router.get('/:id', async (req, res) => {
     
-    const StyleId = req.params.StyleId;
+    const StyleId = parseInt(req.params.id);
 
     try {
         const style = await getStyleById(StyleId);

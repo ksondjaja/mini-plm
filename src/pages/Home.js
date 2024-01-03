@@ -18,7 +18,7 @@ const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
 function Home( props ) {
 
-    const { token } = props;
+    const { setCurrentStyle, token } = props;
 
     const [response, setResponse] = useState([]);
     const [error, setError] = useState('');
@@ -57,8 +57,8 @@ function Home( props ) {
 
     return (
         <Layout>
-            <Grid container spacing={3} textAlign="center">
-                <Grid item mb={3}>
+            <Grid container textAlign="center">
+                <Grid item mb={3} xs={12}>
                     <Typography variant="h2">
                         Hello {props.state.email}
                         {/* 
@@ -69,31 +69,32 @@ function Home( props ) {
                     </Typography>
                 </Grid>
             </Grid>
-            <Grid container spacing={3} my={4} display="flex" justifyItems="stretch" alignItems="center">
-                <Grid item xs={9}>
-                    <TextField
-                        label='Enter Style Name, Number, Category, etc'
-                        name='search'
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={3}>
-                    <Button variant="contained">Search</Button>
-                </Grid>
-            </Grid>
-            <Grid container spacing={3} mb={3} justifyItems="flex-start">
+            <Grid container spacing={3} textAlign="center" justifyContent="center">
                 <Grid item xs={3}>
                     <Button component={Link} to="/createstyle" variant="outlined">
                         Create New Style
                     </Button>
                 </Grid>
             </Grid>
+            <Grid container spacing={3} mt={4} mb={6} display="flex" justifyContent="center" alignItems="center">
+                <Grid item xs={7}>
+                    <TextField
+                        label='Enter Style Name, Number, Category, etc'
+                        name='search'
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={2}>
+                    <Button variant="contained">Search</Button>
+                </Grid>
+            </Grid>
 
             <StyleList 
                 response = {response}
-                token = {props.token}
+                token = {token}
                 loading = {loading}
                 error = {error}
+                setCurrentStyle={setCurrentStyle}
             />
             
         </Layout>
