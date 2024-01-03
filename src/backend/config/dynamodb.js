@@ -1,12 +1,14 @@
 // https://tapiwanashekanda.hashnode.dev/how-to-create-a-crud-api-using-expressjs-and-aws-dynamodb
 
 const AWS = require('aws-sdk');
-require('dotenv').config();
+const variables = require('dotenv').config({ path: '../../.env.local' });
+
+console.log(variables);
 
 AWS.config.update({
-    region: 'us-east-1',
-    accessKeyId: 'AKIAZEXWPZKVZTVHNWYQ',
-    secretAccessKey: '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'
+    region: process.env.AWS_DEFAULT_REGION,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_KEY
 });
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient();
