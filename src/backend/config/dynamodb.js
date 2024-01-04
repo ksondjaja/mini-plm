@@ -51,10 +51,23 @@ const addStyle = async (style) => {
     return await dynamoClient.put(params).promise();
 }
 
+// Delete a style by ID
+const deleteStyleById = async (StyleId) => {
+    const params = {
+        TableName: TABLE_STYLES,
+        Key: {
+            StyleId
+        }
+    };
+
+    return await dynamoClient.delete(params).promise();
+}
+
 
 module.exports = {
     dynamoClient,
     getStylesPreview,
     getStyleById,
-    addStyle
+    addStyle,
+    deleteStyleById
 };

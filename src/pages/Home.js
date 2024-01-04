@@ -57,9 +57,9 @@ function Home( props ) {
 
     return (
         <Layout>
-            <Grid container textAlign="center">
-                <Grid item mb={3} xs={12}>
-                    <Typography variant="h2">
+            <Grid container textAlign="left">
+                <Grid item mb={0} xs={10}>
+                    <Typography variant="h4">
                         Hello {props.state.email}
                         {/* 
                             props.state.email resets to blank when window is refreshed.
@@ -68,15 +68,13 @@ function Home( props ) {
                         */}
                     </Typography>
                 </Grid>
-            </Grid>
-            <Grid container spacing={3} textAlign="center" justifyContent="center">
-                <Grid item xs={3}>
+                <Grid item xs={2}>
                     <Button component={Link} to="/createstyle" variant="outlined">
                         Create New Style
                     </Button>
                 </Grid>
             </Grid>
-            <Grid container spacing={3} mt={4} mb={6} display="flex" justifyContent="center" alignItems="center">
+            <Grid container spacing={3} mt={4} mb={2} display="flex" justifyContent="center" alignItems="center">
                 <Grid item xs={7}>
                     <TextField
                         label='Enter Style Name, Number, Category, etc'

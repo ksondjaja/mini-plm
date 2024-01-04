@@ -2,7 +2,13 @@
 
 const express = require('express');
 
-const { getStylesPreview, getStyleById, addStyle } = require('../config/dynamodb');
+const { 
+    getStylesPreview,
+    getStyleById,
+    addStyle,
+    updateStyleById,
+    deleteStyleById
+} = require('../config/dynamodb');
 
 const router = express.Router();
 
@@ -46,8 +52,42 @@ router.post('/add', async (req, res) => {
 
     try {
         const newStyle = await addStyle(style);
-        console.log(newStyle);
+        
         res.json(newStyle);
+
+        console.log(newStyle);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
+
+router.update('/update/:id', async(req, res) => {
+
+    const StyleId = parseInt(req.params.id);
+    const style = req.body;
+
+    style.id = StyleId;
+
+    try {
+        const updatedStyle = await await addStyle(style);
+        res.json(updatedStyle);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+
+})
+
+router.delete('/delete/:id', async (req, res) => {
+    const StyleId = parseInt(req.params.id);
+
+    try {
+        const style = await deleteStyleById(StyleId);
+
+        res.json(style);
+
+        console.log('Deleted: '+ StyleId)
     } catch (err) {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});

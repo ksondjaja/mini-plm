@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Layout } from "core";
 import {
@@ -15,16 +16,45 @@ import {
 function StylePage( props ) {
 
     const { currentStyle, token } = props;
-
-    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
-
-    const controller = new AbortController();
-
     const styleDetails = currentStyle["Item"];
 
-    useEffect(()=>{
+    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+    const navigate = useNavigate()
+    const controller = new AbortController();
 
-        //useEffect cleanup function
+
+    const deleteStyle = async (styleid) => {
+
+        const StyleId= JSON.stringify(styleid);
+
+        console.log(StyleId);
+
+        try{
+            const res = await axios.delete(
+                (BACKEND_URL_STYLES + `/delete/${StyleId}`),
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+
+            navigate('/home');
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }
+    }
+
+    const handleDeleteStyle = event => {
+        event.preventDefault();
+
+        //In popup, ask user to confirm. Then show feedback message that style has been deleted.
+
+        deleteStyle(styleDetails.StyleId);
+    }
+
+    useEffect(()=>{
         return() => controller.abort();
     }, [token]);
 
@@ -32,6 +62,13 @@ function StylePage( props ) {
         <Layout>
             {props.currentStyle && props.token &&
                 <>
+                <Grid container mb={3} justifyContent="flex-end">
+                    <Grid item>
+                        <Button color="error" variant="contained" onClick={handleDeleteStyle}>
+                            Delete Style
+                        </Button>
+                    </Grid>
+                </Grid>
                 <Grid container mb={3}>
                     <Grid item xs={6}>
                         <Typography variant="h6" color="primary">

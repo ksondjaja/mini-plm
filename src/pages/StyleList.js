@@ -47,7 +47,7 @@ function StyleList(props) {
     }
 
     return (
-        <Grid container spacing={4} mb={5} textAlign="center">
+        <Grid container spacing={3} mb={5} textAlign="center">
             {props.loading && <p>Loading...</p>}
             {!props.loading && props.error && <p>{props.error}</p>}
             {!props.loading && !props.error && !props.response && <p>No Styles in Database</p>}
@@ -57,21 +57,26 @@ function StyleList(props) {
                 <p>Data object type error</p>
             }
 
-            {/* {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
-            
-                <p>{props.response["Items"]}</p>
-            } */}
+            {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
+                <Grid item xs={3} justifyContent="center" textAlign="center">
+                    {props.response["Count"]===0 && <p>No Styles in Database</p>}
+                </Grid>
+            }
 
             {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
+                <>
+                    <Grid item xs={12} justifyContent="center" textAlign="center">
+                        <Typography>
+                            {JSON.stringify(props.response["Count"])} Style{props.response["Count"]>1??<>s</>} found in Database
+                        </Typography>
+                    </Grid>
 
-                props.response["Items"].map(s => (
-                <Grid item key={s.StykeId} xs={4} textAlign="left">
-                    <Button component="box"
-                        sx={{ display: "flex", flexDirection: "column", margin: 2, border:2, padding: 2}}
-                        onClick={()=> {handleClickStyle(s.StyleId)}}
-                    >
-
-
+                    {props.response["Items"].map(s => (
+                        <Grid item key={s.StykeId} xs={4} textAlign="left">
+                            <Button component="box"
+                                sx={{ display: "flex", flexDirection: "column", margin: 2, border:2, padding: 2}}
+                                onClick={()=> {handleClickStyle(s.StyleId)}}
+                            >
                                 <Typography variant="h5">
                                     {s.StyleName}
                                 </Typography>
@@ -84,13 +89,11 @@ function StyleList(props) {
                                     <b>Category:</b> {s.Category}
                                 </Typography>
 
-                    </Button>
-                </Grid>
-                ))       
-                
+                            </Button>
+                        </Grid>
+                    ))}   
+                </>
             }
-            
-
         </Grid>
     )
 }
