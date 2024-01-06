@@ -51,6 +51,20 @@ const addStyle = async (style) => {
     return await dynamoClient.put(params).promise();
 }
 
+//Update a single attribute in a style
+const editAttribute = async(StyleId, attribute, value) => {
+
+    const params = {
+        TableName: TABLE_STYLES,
+        Key: StyleId,
+        Item:{
+            [attribute]: value
+        }
+    }
+    
+    return await dynamoClient.putItem(params).promise();
+}
+
 // Delete a style by ID
 const deleteStyleById = async (StyleId) => {
     const params = {
@@ -68,6 +82,7 @@ module.exports = {
     dynamoClient,
     getStylesPreview,
     getStyleById,
+    editAttribute,
     addStyle,
     deleteStyleById
 };
