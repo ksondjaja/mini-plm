@@ -4,7 +4,8 @@ const SelectData = {
     "commodities": ["Top", "Bottom", "Overall/Dress", "Outerwear", "Hat", "Socks", "Scarf", "Misc Accessory"],
     "fabricTypes": ["Woven", "Cut & Sew Knit", "Sweater Knit", "Denim"],
     "silhouettes": ["Fitted", "Slim", "Classic", "Relaxed", "Oversized"],
-    "sizes": ["XXS-XXL", "0-14", "16-24", "28-42"]
+    "sizes": ["XXS-XXL", "0-14", "16-24", "28-42"],
+    "vendors": ["123 Textiles", "XYZ Knits", "789 Denim"]
 }
 
 export default SelectData;

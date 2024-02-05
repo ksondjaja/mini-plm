@@ -67,12 +67,12 @@ function StyleList(props) {
                 <>
                     <Grid item xs={12} justifyContent="center" textAlign="center">
                         <Typography>
-                            {JSON.stringify(props.response["Count"])} Style{props.response["Count"]>1??<>s</>} found in Database
+                            {JSON.stringify(props.response["Count"])} Styles found in Database
                         </Typography>
                     </Grid>
 
                     {props.response["Items"].map(s => (
-                        <Grid item key={s.StykeId} xs={4} textAlign="left">
+                        <Grid item key={s.StyleId} xs={4} textAlign="left">
                             <Button component="box"
                                 sx={{ display: "flex", flexDirection: "column", margin: 2, border:2, padding: 2}}
                                 onClick={()=> {handleClickStyle(s.StyleId)}}

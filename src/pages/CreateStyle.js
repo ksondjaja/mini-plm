@@ -37,6 +37,7 @@ function CreateStyle( props ) {
     const fabricTypes = ['Woven', 'Cut & Sew Knit', 'Sweater Knit', 'Denim'];
     const silhouettes = ['Fitted', 'Slim', 'Classic', 'Relaxed', 'Oversized'];
     const sizes = ["XXS-XXL", "0-14", "16-24", "28-42"]
+    const vendors = ["123 Textiles", "XYZ Knits", "789 Denim"]
 
     const [postResponse, setPostResponse] = useState([]);
     const [postError, setPostError] = useState('');
@@ -267,6 +268,29 @@ function CreateStyle( props ) {
                     </TextField>
                 </Grid>
             </Grid>
+
+            <Grid container spacing={3} mb={5} alignContent="flex-end" justifyContent="start">
+                <Grid item xs={4}>
+                <TextField
+                        labelId="select-vendor"
+                        id="select-vendor"
+                        value={newStyle.Vendor ?? vendors[0]}
+                        label="Vendor"
+                        name="Vendor"
+                        onChange={handleNewStyleChange}
+                        select
+                        fullWidth
+                        required
+                    >
+                        {vendors.map((vendor, i)=>(
+                            <MenuItem key={i} value={vendor}>
+                                {vendor}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Grid>
+            </Grid>
+
             <Grid container spacing={3} mb={5} alignContent="flex-end" justifyContent="start">
                 <Grid item xs={4}>
                     <Button
