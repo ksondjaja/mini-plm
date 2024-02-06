@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import {
     Grid,
@@ -12,38 +11,14 @@ import {
 
 function StyleList(props) {
 
-    const { token, setCurrentStyle } = props;
+    const { fetchStyle, currentStyle, setCurrentStyle, token } = props;
 
-    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
-
-    const navigate = useNavigate()
-
-    const fetchStyle = async (styleid) => {
-
-        const StyleId= JSON.stringify(styleid);
-
-        console.log(StyleId);
-
-        try{
-            const res = await axios.get(
-                (BACKEND_URL_STYLES + `/${StyleId}`),
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token
-                    }
-                }
-            )
-            console.log('Response: ' + JSON.stringify(res.data));
-            setCurrentStyle(res.data);
-
-            navigate('/stylepage');
-        }catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-        }
-    }
+    const navigate = useNavigate();
 
     const handleClickStyle = styleid =>{
+        // How to navigate first, then fetchStyle upon StylePage load
         fetchStyle(styleid);
+        navigate('/stylepage/' + styleid );
     }
 
     return (

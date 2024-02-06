@@ -12,6 +12,7 @@ import {
   Navigate,
   useNavigate
 } from "react-router-dom";
+import axios from 'axios';
 import { auth } from './firebase';
 import { signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { Layout } from "core";
@@ -33,14 +34,18 @@ function App (props) {
   const [token, setToken] = useState('');
   const [currentStyle, setCurrentStyle] = useState();
 
+
+  const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+
+  const navigate = useNavigate()
+
+
   const logIn = e => {
       setState({
         ...state,
         loggedIn: true,
       });
   }
-
-  const navigate = useNavigate()
 
   const onSubmitLogIn = async (e) => {
     e.preventDefault()
@@ -85,6 +90,28 @@ function App (props) {
  
   }
 
+  const fetchStyle = async (styleid) => {
+
+      const StyleId= JSON.stringify(styleid);
+
+      console.log(StyleId);
+
+      try{
+          const res = await axios.get(
+              (BACKEND_URL_STYLES + `/${StyleId}`),
+              {
+                  headers: {
+                      Authorization: 'Bearer ' + token
+                  }
+              }
+          )
+          console.log('Response: ' + JSON.stringify(res.data));
+          setCurrentStyle(res.data);
+      }catch(err){
+          console.log('Error: ' + JSON.stringify(err.message));
+      }
+  }
+
   const handleStateChange = event => {
       const value = event.target.value;
 
@@ -101,6 +128,7 @@ function App (props) {
     setToken,
     logIn,
     logOut,
+    fetchStyle,
     handleStateChange
   }
 
@@ -155,6 +183,7 @@ function App (props) {
                 <Home
                   token={token}
                   setCurrentStyle={setCurrentStyle}
+                  fetchStyle={fetchStyle}
                   {...props}
                 />
               :
@@ -177,12 +206,13 @@ function App (props) {
             />
 
             <Route
-              exact path="/stylepage"
+              exact path="/stylepage/:id"
               element={
                 state.loggedIn ?
                   <StylePage
-                    token={token}
-                    currentStyle={currentStyle}
+                    token = {token}
+                    currentStyle = {currentStyle}
+                    fetchStyle = {fetchStyle}
                     {...props}
                   />
                 :

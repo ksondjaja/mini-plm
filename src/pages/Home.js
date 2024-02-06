@@ -18,7 +18,7 @@ const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
 function Home( props ) {
 
-    const { setCurrentStyle, token } = props;
+    const { fetchStyle, setCurrentStyle, token } = props;
 
     const [response, setResponse] = useState([]);
     const [error, setError] = useState('');
@@ -92,7 +92,9 @@ function Home( props ) {
                 token = {token}
                 loading = {loading}
                 error = {error}
-                setCurrentStyle={setCurrentStyle}
+                setCurrentStyle = {setCurrentStyle}
+                fetchStyle = {fetchStyle}
+                {...props}
             />
             
         </Layout>
