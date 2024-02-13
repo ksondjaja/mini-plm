@@ -18,7 +18,7 @@ export const StyleAttribute = props => {
     const cat = SelectData[props.selectCat];
 
     const [focused, setFocused] = useState(false);
-    const [newValue, setNewValue] = useState(null);
+    //const [newValue, setNewValue] = useState(null);
 
     const handleFocus = event => {
         event.preventDefault();
@@ -27,42 +27,45 @@ export const StyleAttribute = props => {
 
     const handleBlur = event => {
         event.preventDefault();
-        setNewValue(null);
+        //setNewValue(null);
         setFocused(false);
     }
 
-    const handleInputChange = event => {
-        const value = event.target.value
-        setNewValue(value);
-    }
+    // const handleInputChange = event => {
+    //     const value = event.target.value
+    //     setNewValue(value);
+    // }
 
-    const handleSaveEdit = event => {
-        event.preventDefault();
-    }
+    // const handleSaveEdit = event => {
+    //     event.preventDefault();
+    // }
 
     return (
     <Box px={1}>
         <TextField
             variant="standard"
-            label={focused? <>{props.attribute} (editing)</>: props.attribute}
-            value={newValue ?? props.text}
-            onChange={handleInputChange}
-            helperText={focused && "Click checkmark to save"}
+            label={props.attribute}
+            name={props.attribute}
+            value={props.text}
+            //onChange={handleInputChange}
+            // helperText={focused && "Click checkmark to save"}
             select={props.select? true : false}
             InputProps={{
                 style: {fontSize: props.textSize, color:props.textColor, fontWeight: (props.bold? 'bold' : 'normal')},
-                endAdornment: (
-                <InputAdornment position="end" sx={{ marginRight: "-30px" }}>
-                    {focused &&
-                        <IconButton color="success">
-                            <Check/>
-                        </IconButton>
-                    }
-                </InputAdornment>
-            )}}
+                // endAdornment: (
+                // <InputAdornment position="end" sx={{ marginRight: "-30px" }}>
+                //     {focused &&
+                //         <IconButton color="success">
+                //             <Check/>
+                //         </IconButton>
+                //     }
+                // </InputAdornment>
+                // )
+            }}
+            // sx={ props.select && {width: focused? "75%": "80%"}}
+            fullWidth
             onFocus={handleFocus}
             onBlur={handleBlur}
-            sx={ props.select && {width: focused? "75%": "80%"}}
             {...props}
         >
             {props.select && 

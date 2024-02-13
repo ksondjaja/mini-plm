@@ -19,11 +19,19 @@ function StyleInfo( props ){
 
     const { styleDetails, token } = props;
     const [editMode, setEditMode] = useState(false);
+    const [editValues, setEditValues] = useState(styleDetails)
 
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
     const navigate = useNavigate()
 
-
+    const handleEditChange = event => {
+        const value = event.target.value
+  
+        setEditValues({
+          ...editValues,
+          [event.target.name]: value
+        });
+    }
 
     const deleteStyle = async (styleid) => {
 
@@ -60,9 +68,13 @@ function StyleInfo( props ){
         <>
             <Grid container mb={3}>
                 <Grid item xs={6} justifyContent="flex-start">
-                    {!editMode&&
+                    {!editMode ?
                         <Button color="primary" variant="contained">
                             Print QR Tag
+                        </Button>
+                    :
+                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={handleDeleteStyle}>
+                            Delete Style
                         </Button>
                     }
                 </Grid>
@@ -73,12 +85,13 @@ function StyleInfo( props ){
                         </Button>    
                     :    
                     <>
+                        <Button color="primary" variant="outlined" sx={{mx: 2}} onClick={()=>setEditMode(false)}>
+                            Discard Edits
+                        </Button>
+
                         <Button color="primary" variant="contained" sx={{mx: 2}} onClick={()=>setEditMode(false)}>
-                            Done Editing
-                        </Button>
-                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={handleDeleteStyle}>
-                            Delete Style
-                        </Button>
+                            Save Edits
+                        </Button>       
                     </>   
                     }
                 </Grid>
@@ -88,169 +101,179 @@ function StyleInfo( props ){
             <Grid container display="flex" justifyContent="stretch" spacing={2}>
                 <Grid item sm={6}>
                     <Box sx={{ height: "100%", bgcolor: "black"}}>
-
+                        {/* Style Image Here */}
                     </Box>
                 </Grid>
+
                 <Grid item sm={6}>
                     <Grid container>
 
-                        <Grid item xs={12}>
-                            {!editMode?
+                        {!editMode?
+                        <>
+                            <Grid item xs={12}>
                                 <Typography variant="body1" color="primary">
                                     {styleDetails.Season}   {styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''} - <b>{styleDetails.Category}</b>
                                 </Typography>
-                            :
-                            <Grid container>
-                                <Grid item xs={4}>
-                                    <StyleAttribute
-                                        textSize="20px"
-                                        textColor="#1976d2"
-                                        attribute="Season"
-                                        selectCat="seasons"
-                                        text={styleDetails.Season}
-                                        select
-                                    />
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <StyleAttribute
-                                        textSize="20px"
-                                        textColor="#1976d2"
-                                        attribute="Delivery Year"
-                                        text={styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''}
-                                    />
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <StyleAttribute
-                                    textSize="20px"
-                                    textColor="#1976d2"
-                                    attribute="Category"
-                                    selectCat="categories"
-                                    text={styleDetails.Category}
-                                    select
-                                    />             
-                                </Grid>
                             </Grid>
-                            }
-                        </Grid>
 
-                        <Grid item xs={12}>
-                            {!editMode?
+                            <Grid item xs={12}>
                                 <Typography variant="h4" color="primary">
                                     <b>{styleDetails.StyleName}</b>
                                 </Typography>
-                            :
-                                <StyleAttribute
-                                textSize="24px"
-                                textColor="#1976d2"
-                                attribute="Style Name"
-                                text={styleDetails.StyleName}
-                                bold
-                                />
-                            }
-                        </Grid>
+                            </Grid>
 
-                        <Grid item xs={12} mb={2}>
-                            <Typography variant="body1" color="#1976d2">
-                                Style ID: <b>{styleDetails.StyleId}</b>
-                            </Typography>
-                        </Grid>
-                        
-                        
-                        {!editMode?
+                            <Grid item xs={12} mb={2}>
+                                <Typography variant="body1" color="#1976d2">
+                                    Style ID: <b>{styleDetails.StyleId}</b>
+                                </Typography>
+                            </Grid>
+
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="black">
                                     Commodity Type: <b>{styleDetails.FabricType} {styleDetails.Commodity}</b>
                                 </Typography>
                             </Grid>
-                            :
-                            <>
+
+                            <Grid item xs={12}>
+                                <Typography variant="body1" color="black">
+                                    Silhouette: <b>{styleDetails.Silhouette}</b>
+                                </Typography>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Typography variant="body1" color="black">
+                                    Size Range: <b>{styleDetails.SizeRange}</b>
+                                </Typography>
+                            </Grid>
+
+                            <Grid item xs={12} mt={2}>
+                                <Typography variant="body1" color="black">
+                                    Vendor: <b>{styleDetails.Vendor}</b>
+                                </Typography>
+                            </Grid>
+                        </>
+                        :
+                        <>
+                            <Grid item xs={12}>
+                                <Grid container mb={2}>
+                                    <Grid item xs={4}>
+                                        <StyleAttribute
+                                            textSize="20px"
+                                            textColor="#1976d2"
+                                            attribute="Season"
+                                            selectCat="seasons"
+                                            text={editValues.Season}
+                                            select
+                                            onChange={handleEditChange}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <StyleAttribute
+                                            textSize="20px"
+                                            textColor="#1976d2"
+                                            attribute="Delivery Year"
+                                            text={editValues.DeliveryDate? JSON.stringify(editValues.DeliveryDate).slice(1,5) : ''}
+                                            onChange={handleEditChange}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <StyleAttribute
+                                        textSize="20px"
+                                        textColor="#1976d2"
+                                        attribute="Category"
+                                        selectCat="categories"
+                                        text={editValues.Category}
+                                        select
+                                        onChange={handleEditChange}
+                                        />             
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <StyleAttribute
+                                    textSize="24px"
+                                    textColor="#1976d2"
+                                    attribute="Style Name"
+                                    text={editValues.StyleName}
+                                    sx={{ width: '90%'}}
+                                    bold
+                                    onChange={handleEditChange}
+                                />
+                            </Grid>
+
+                            <Grid container mt={2} mb={2} display="flex">
                                 <Grid item xs={6}>
                                     <StyleAttribute
                                         textSize="16px"
                                         textColor="#1976d2"
                                         attribute="FabricType"
                                         selectCat="fabricTypes"
-                                        text={styleDetails.FabricType}
+                                        text={editValues.FabricType}
                                         bold
                                         select
+                                        onChange={handleEditChange}
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
                                     <StyleAttribute
                                         textSize="16px"
                                         textColor="#1976d2"
-                                        attribute="Silhouette"
-                                        selectCat="silhouettes"
-                                        text={styleDetails.Silhouette}
+                                        attribute="Commodity"
+                                        selectCat="commodities"
+                                        text={editValues.Commodity}
                                         bold
                                         select
+                                        onChange={handleEditChange}
                                     />
                                 </Grid>
-                            </>
-                            }
-                        </Grid>
-                        
-                        <Grid container>
-                            {!editMode?
-                                <Grid item xs={12}>
-                                    <Typography variant="body1" color="black">
-                                        Silhouette: <b>{styleDetails.Silhouette}</b>
-                                    </Typography>
-                                </Grid>
-                                :
-                                <Grid item xs={6} mt={2}>
+                            </Grid>
+                            
+                            <Grid container>
+                                <Grid item xs={6}>
                                     <StyleAttribute
                                         textSize="16px"
                                         textColor="#1976d2"
-                                        attribute="Commodity"
-                                        selectCat="commodities"
-                                        text={styleDetails.Commodity}
+                                        attribute="Silhouette"
+                                        selectCat="silhouettes"
+                                        text={editValues.Silhouette}
                                         bold
                                         select
+                                        onChange={handleEditChange}
                                     />
                                 </Grid>
-                            }
                             </Grid>
-                        
+
                             <Grid container>
-                            {!editMode?
-                                <Grid item xs={12}>
-                                    <Typography variant="body1" color="black">
-                                        Size Range: <b>{styleDetails.SizeRange}</b>
-                                    </Typography>
-                                </Grid>
-                                :
                                 <Grid item xs={6} mt={2}>
                                     <StyleAttribute
                                         textSize="16px"
                                         textColor="black"
                                         attribute="SizeRange"
                                         selectCat="sizes"
-                                        text={styleDetails.SizeRange}
+                                        text={editValues.SizeRange}
                                         select
+                                        onChange={handleEditChange}
                                     />
                                 </Grid>
-                            }
                             </Grid>
 
-                            {!editMode?
-                                <Grid item xs={12} mt={2}>
-                                    <Typography variant="body1" color="black">
-                                        Vendor: <b>{styleDetails.Vendor}</b>
-                                    </Typography>
-                                </Grid>
-                                :
+                            <Grid container>
                                 <Grid item xs={6} mt={3}>
                                     <StyleAttribute
                                         textSize="16px"
                                         textColor="black"
                                         attribute="Vendor"
                                         selectCat="vendors"
-                                        text={styleDetails.Vendor?? ''}
+                                        text={editValues.Vendor?? ''}
                                         select
+                                        onChange={handleEditChange}
                                     />
                                 </Grid>
-                            }
+                            </Grid>
+                        </>
+                        }
+
                         
                         
                         {!editMode &&
@@ -267,8 +290,8 @@ function StyleInfo( props ){
                             </Grid>
                         </>
                         }
+                    </Grid>
                 </Grid>
-                    
             </Grid>
         </>
     )

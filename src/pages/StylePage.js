@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import axios from 'axios';
 import StyleInfo from './style-tabs/StyleInfo';
+import StyleMenu from './style-tabs/StyleMenu';
 import { 
-    Layout,
+    StylePageLayout,
 } from "core";
 
 
@@ -22,9 +23,6 @@ function StylePage( props ) {
     const styleid = params["id"];
 
     const fetchStyle = async (styleid, token) => {
-  
-        // console.log(styleid);
-        // console.log("Token: " + token)
   
         try{
             const res = await axios.get(
@@ -55,14 +53,19 @@ function StylePage( props ) {
     return(
         <>
         {!loading &&
-            <Layout>
-                {/* <p>{JSON.stringify(currentStyle)}</p> */}
+            <StylePageLayout>
+                <StyleMenu
+                    styleid={styleid}
+                    stylename={currentStyle.StyleName}
+                    {...props}
+                />
+
                 <StyleInfo
                     styleDetails = {currentStyle}
                     token = {token}
                     {...props}
                 /> 
-            </Layout>
+            </StylePageLayout>
         }
         </>
     )
