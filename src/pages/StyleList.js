@@ -11,13 +11,11 @@ import {
 
 function StyleList(props) {
 
-    const { fetchStyle, currentStyle, setCurrentStyle, token } = props;
-
     const navigate = useNavigate();
 
     const handleClickStyle = styleid =>{
         // How to navigate first, then fetchStyle upon StylePage load
-        fetchStyle(styleid);
+        //fetchStyle(styleid);
         navigate('/stylepage/' + styleid );
     }
 

@@ -18,7 +18,7 @@ const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
 function Home( props ) {
 
-    const { fetchStyle, setCurrentStyle, token } = props;
+    const { token } = props;
 
     const [response, setResponse] = useState([]);
     const [error, setError] = useState('');
@@ -36,10 +36,10 @@ function Home( props ) {
                     }
                 }
             );
-            console.log('Response: ' + JSON.stringify(res.data) );
+            //console.log('Response: ' + JSON.stringify(res.data) );
             setResponse(res.data);
         } catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
+            //console.log('Error: ' + JSON.stringify(err.message));
             setError(JSON.stringify(err.message));
         } finally {
             setLoading(false);
@@ -92,8 +92,6 @@ function Home( props ) {
                 token = {token}
                 loading = {loading}
                 error = {error}
-                setCurrentStyle = {setCurrentStyle}
-                fetchStyle = {fetchStyle}
                 {...props}
             />
             

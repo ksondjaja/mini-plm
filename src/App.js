@@ -12,7 +12,6 @@ import {
   Navigate,
   useNavigate
 } from "react-router-dom";
-import axios from 'axios';
 import { auth } from './firebase';
 import { signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { Layout } from "core";
@@ -27,15 +26,11 @@ function App (props) {
 
   const [state, setState] = useState(
       {
-          loggedIn: false || window.localStorage.getItem('auth')==='true',
+          loggedIn: window.localStorage.getItem('auth')==='true' ?? false,
           email: window.localStorage.getItem('mini-plm-user')
       }
   )
-  const [token, setToken] = useState('');
-  const [currentStyle, setCurrentStyle] = useState();
-
-
-  const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+  const [token, setToken] = useState(window.localStorage.getItem('mini-plm-access') ?? '');
 
   const navigate = useNavigate()
 
@@ -77,6 +72,7 @@ function App (props) {
 
       window.localStorage.removeItem("auth");
       window.localStorage.removeItem("mini-plm-user");
+      window.localStorage.removeItem("mini-plm-access");
 
       setState({
         ...state,
@@ -88,28 +84,6 @@ function App (props) {
       console.log(errorCode, errorMessage);
     });
  
-  }
-
-  const fetchStyle = async (styleid) => {
-
-      const StyleId= JSON.stringify(styleid);
-
-      console.log(StyleId);
-
-      try{
-          const res = await axios.get(
-              (BACKEND_URL_STYLES + `/${StyleId}`),
-              {
-                  headers: {
-                      Authorization: 'Bearer ' + token
-                  }
-              }
-          )
-          console.log('Response: ' + JSON.stringify(res.data));
-          setCurrentStyle(res.data);
-      }catch(err){
-          console.log('Error: ' + JSON.stringify(err.message));
-      }
   }
 
   const handleStateChange = event => {
@@ -128,7 +102,6 @@ function App (props) {
     setToken,
     logIn,
     logOut,
-    fetchStyle,
     handleStateChange
   }
 
@@ -141,8 +114,8 @@ function App (props) {
           userCred.getIdToken().then((token)=>{
               // console.log('Token: '+token);
               setToken(token);
+              window.localStorage.setItem("mini-plm-access", token);
           })
-          navigate("/home");
         }
     })}
   ,[])
@@ -154,14 +127,6 @@ function App (props) {
       <Layout>
 
         <Routes>
-          <Route path="/"
-            element={
-                state.loggedIn ?
-                  <Navigate to="/home"/>
-                : 
-                  <Navigate to="/login"/>
-              }
-          />
 
           <Route
             exact path="/login"
@@ -182,8 +147,6 @@ function App (props) {
               state.loggedIn ?
                 <Home
                   token={token}
-                  setCurrentStyle={setCurrentStyle}
-                  fetchStyle={fetchStyle}
                   {...props}
                 />
               :
@@ -206,19 +169,27 @@ function App (props) {
             />
 
             <Route
-              exact path="/stylepage/:id"
+              path="/stylepage/:id"
               element={
                 state.loggedIn ?
                   <StylePage
                     token = {token}
-                    currentStyle = {currentStyle}
-                    fetchStyle = {fetchStyle}
                     {...props}
                   />
                 :
                   <Navigate to="/login"/>
               }
             />
+
+          <Route
+            path="*"
+            element={
+                state.loggedIn ?
+                  <Navigate to="/home"/>
+                : 
+                  <Navigate to="/login"/>
+              }
+          />
 
         </Routes>
 

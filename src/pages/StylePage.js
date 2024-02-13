@@ -4,48 +4,67 @@ import axios from 'axios';
 import StyleInfo from './style-tabs/StyleInfo';
 import { 
     Layout,
-    StyleAttribute
 } from "core";
-import {
-    Grid,
-    TextField,
-    Select,
-    MenuItem,
-    Box,
-    Typography,
-    Button
-} from '@mui/material';
 
 
 function StylePage( props ) {
 
-    const { fetchStyle, currentStyle, token } = props;
+    const [token, setToken] = useState(window.localStorage.getItem('mini-plm-access') ?? '');
+
+    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+
+    const [currentStyle, setCurrentStyle] = useState();
+    const [loading, setLoading] = useState(true);
 
     const params = useParams();
-    const styleid = JSON.stringify(params["id"]);
-
     const controller = new AbortController();
+
+    const styleid = params["id"];
+
+    const fetchStyle = async (styleid, token) => {
+  
+        // console.log(styleid);
+        // console.log("Token: " + token)
+  
+        try{
+            const res = await axios.get(
+                (BACKEND_URL_STYLES + `/${styleid}`),
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+            setCurrentStyle((res.data)["Item"]);
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }finally{
+            setLoading(false);
+        }
+    }
     
 
     useEffect(()=>{
-        console.log(styleid);
-        // fetchStyle(styleid);
+        fetchStyle(styleid, token);
 
         //useEffect cleanup function
         return() => controller.abort();
     }, [token]);
 
     return(
-        <Layout>
-            {props.currentStyle && props.token &&
+        <>
+        {!loading &&
+            <Layout>
+                {/* <p>{JSON.stringify(currentStyle)}</p> */}
                 <StyleInfo
-                    styleDetails = {currentStyle["Item"]}
+                    styleDetails = {currentStyle}
                     token = {token}
                     {...props}
-                />
-            }
-            
-        </Layout>
+                /> 
+            </Layout>
+        }
+        </>
     )
 }
 
