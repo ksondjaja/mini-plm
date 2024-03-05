@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { 
     StyleAttribute
 } from "core";
@@ -13,6 +14,12 @@ import {
     Typography,
     Button
 } from '@mui/material';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import {
+    LocalizationProvider,
+    DatePicker
+} from '@mui/x-date-pickers/';
 
 
 function StyleInfo( props ){
@@ -31,6 +38,14 @@ function StyleInfo( props ){
           ...editValues,
           [event.target.name]: value
         });
+    }
+
+    const handleEditDatePickerChange = (value, name) => {
+
+        setEditValues({
+            ...editValues,
+            [name]: value
+        })
     }
 
     const deleteStyle = async (styleid) => {
@@ -127,6 +142,11 @@ function StyleInfo( props ){
                                     Style ID: <b>{styleDetails.StyleId}</b>
                                 </Typography>
                             </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body1" color="black">
+                                    Delivery Date: <b>{styleDetails.DeliveryDate.slice(0,10)}</b>
+                                </Typography>
+                            </Grid>
 
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="black">
@@ -155,8 +175,8 @@ function StyleInfo( props ){
                         :
                         <>
                             <Grid item xs={12}>
-                                <Grid container mb={2}>
-                                    <Grid item xs={4}>
+                                <Grid container mb={2} display="flex" alignContent="center">
+                                    <Grid item xs={6}>
                                         <StyleAttribute
                                             textSize="20px"
                                             textColor="#1976d2"
@@ -167,16 +187,24 @@ function StyleInfo( props ){
                                             onChange={handleEditChange}
                                         />
                                     </Grid>
-                                    <Grid item xs={4}>
-                                        <StyleAttribute
-                                            textSize="20px"
-                                            textColor="#1976d2"
-                                            attribute="Delivery Year"
-                                            text={editValues.DeliveryDate? JSON.stringify(editValues.DeliveryDate).slice(1,5) : ''}
-                                            onChange={handleEditChange}
-                                        />
+                                    <Grid item xs={6}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer components={['DatePicker']}>
+                                                <DatePicker
+                                                    id="delivery-date"
+                                                    label='Delivery Date'
+                                                    name='DeliveryDate'
+                                                    views={['year', 'month', 'day']}
+                                                    value={dayjs(editValues.DeliveryDate) ?? dayjs()}
+                                                    onChange={(newDate)=>handleEditDatePickerChange(newDate, 'DeliveryDate')}
+                                                    slotProps={{ textField: { variant: "standard" } }}
+                                                    fullWidth
+                                                    required
+                                                />
+                                            </DemoContainer>
+                                        </LocalizationProvider>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item xs={6}>
                                         <StyleAttribute
                                         textSize="20px"
                                         textColor="#1976d2"
@@ -203,6 +231,7 @@ function StyleInfo( props ){
                             </Grid>
 
                             <Grid container mt={2} mb={2} display="flex">
+                                
                                 <Grid item xs={6}>
                                     <StyleAttribute
                                         textSize="16px"
