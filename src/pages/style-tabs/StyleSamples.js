@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import dayjs from 'dayjs';
+import SamplesHistory from "./Samples/SamplesHistory";
 import { 
     StyleAttribute
 } from "core";
@@ -36,6 +37,8 @@ function StyleSamples( props ){
                 </Grid>
             </Grid>
             {/* Show either History page or Specs page */}
+
+            <SamplesHistory />
         </>
     )
 }
