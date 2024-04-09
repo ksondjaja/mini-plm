@@ -38,6 +38,7 @@ function Home( props ) {
             );
             //console.log('Response: ' + JSON.stringify(res.data) );
             setResponse(res.data);
+            console.log(JSON.stringify(res.data));
         } catch(err){
             //console.log('Error: ' + JSON.stringify(err.message));
             setError(JSON.stringify(err.message));

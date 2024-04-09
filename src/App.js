@@ -125,9 +125,10 @@ function App (props) {
     handleStateChange
   }
 
-  // Temporary solution for persistent login
+  // Figure out how automatically logout if token has expired
+
   useEffect(()=>{
-    // Autologin if user is still logged in through Firebase & last loging was less than 24 hours ago
+    // Autologin if user is still logged in through Firebase & last login was less than 24 hours ago
     auth.onAuthStateChanged((userCred) => {
       if(userCred && getStoredAuth){
 

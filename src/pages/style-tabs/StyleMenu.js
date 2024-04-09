@@ -24,13 +24,13 @@ function StyleMenu(props) {
     const styleUrl = "/stylepage/" + props.styleid
 
     const styleLinks = [
-        {id: 1, name: "Overview", url: styleUrl},
-        {id: 2, name: "Images", url: "/#"},
-        {id: 3, name: "Samples", url: "/#"},
-        {id: 4, name: "Grading", url: "/#"},
-        {id: 5, name: "BOM", url: "/#"},
-        {id: 6, name: "Construction", url: "/#"},
-        {id: 7, name: "Costs", url: "/#"},
+        {id: 1, name: "Overview", tab:"Overview"},
+        {id: 2, name: "Images", tab: "Images"},
+        {id: 3, name: "Samples", tab: "Samples"},
+        {id: 4, name: "Grading", tab: "Grading"},
+        {id: 5, name: "BOM", tab: "BOM"},
+        {id: 6, name: "Construction", tab: "Construction"},
+        {id: 7, name: "Costs", url: "Costs"},
     ]
 
     return(
@@ -49,7 +49,11 @@ function StyleMenu(props) {
                             variant="body1"
                             color="primary"
                             underline="none"
-                            sx={{ mx: 2, '&:hover': { textDecoration: "underline" }}}
+                            sx={{ mx: 2,
+                                fontWeight: ((l.tab===props.tab)? "bold" : "normal"),
+                                '&:hover': { textDecoration: "underline", cursor: "pointer" }
+                            }}
+                            onClick={()=>props.setTab(l.tab)}
                         >
                             {l.name}
                         </Link>
@@ -57,7 +61,7 @@ function StyleMenu(props) {
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", width: "100%"}}>
                     <Typography variant="body1" color="black">
-                        ({props.styleid}) {props.stylename} &gt; Overview
+                        [{props.styleid}] {props.stylename} &gt; Overview
                     </Typography>
                 </Box>
             </Toolbar>

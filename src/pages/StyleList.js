@@ -30,11 +30,11 @@ function StyleList(props) {
                 <p>Data object type error</p>
             }
 
-            {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
+            {/* {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
                 <Grid item xs={3} justifyContent="center" textAlign="center">
                     {props.response["Count"]===0 && <p>No Styles in Database</p>}
                 </Grid>
-            }
+            } */}
 
             {!props.loading && !props.error && props.response && props.token && (props.response !== undefined) &&
                 <>
@@ -51,15 +51,19 @@ function StyleList(props) {
                                 onClick={()=> {handleClickStyle(s.StyleId)}}
                             >
                                 <Typography variant="h5">
-                                    {s.StyleName}
+                                    {s.StyleInfo.StyleName}
                                 </Typography>
 
                                 <Typography variant="body1">
-                                    <b>Season:</b> {s.Season} {s.DeliveryDate? JSON.stringify(s.DeliveryDate).slice(1,5) : ''}
+                                    <b>Style Num:</b> {s.StyleId}
                                 </Typography>
 
                                 <Typography variant="body1">
-                                    <b>Category:</b> {s.Category}
+                                    <b>Season:</b> {s.StyleInfo.Season} {s.StyleInfo.DeliveryDate? JSON.stringify(s.StyleInfo.DeliveryDate).slice(1,5) : ''}
+                                </Typography>
+
+                                <Typography variant="body1">
+                                    <b>Category:</b> {s.StyleInfo.Category}
                                 </Typography>
 
                             </Button>

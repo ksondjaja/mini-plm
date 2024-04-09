@@ -6,7 +6,7 @@ const {
     getStylesPreview,
     getStyleById,
     addStyle,
-    editAttribute,
+    editInfo,
     deleteStyleById
 } = require('../config/dynamodb');
 
@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
 // api endpoint to get Style by StyleId
 router.get('/:id', async (req, res) => {
     
-    const StyleId = parseInt(req.params.id);
+    const StyleId = req.params.id;
 
     try {
         const style = await getStyleById(StyleId);
@@ -62,32 +62,16 @@ router.post('/add', async (req, res) => {
     }
 })
 
-//Edit a single attribute of Style by Id
-router.put('/edit/:id/:attribute', async(req, res) =>{
-    const StyleId = parseInt(req.params.id);
-    const attribute = req.params.attribute
-    const newValue = req.body
-
-    try {
-        const editedAttribute = await editAttribute(StyleId, attribute, newValue);
-        res.json(editedAttribute);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({err: `Something went wrong`});
-    }
-})
 
 // Update a lot of attributes in a Style by Id (replaces exsting entry with newer version of info)
-router.put('/update/:id', async(req, res) => {
+router.post('/update/:id', async(req, res) => {
 
-    const StyleId = parseInt(req.params.id);
     const style = req.body;
 
-    style.id = StyleId;
-
     try {
-        const updatedStyle = await addStyle(style);
+        const updatedStyle = await editInfo(style);
         res.json(updatedStyle);
+        console.log(updatedStyle);
     } catch (err) {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
@@ -95,8 +79,10 @@ router.put('/update/:id', async(req, res) => {
 
 })
 
+
 router.delete('/delete/:id', async (req, res) => {
-    const StyleId = parseInt(req.params.id);
+
+    const StyleId = req.params.id;
 
     try {
         const style = await deleteStyleById(StyleId);

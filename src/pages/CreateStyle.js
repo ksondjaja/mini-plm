@@ -43,22 +43,25 @@ function CreateStyle( props ) {
     const [postError, setPostError] = useState('');
     const [postLoading, setPostLoading] = useState(true);
 
+    const dateNow = Date.now();
+
     const [newStyle, setNewStyle] = useState({
-        StyleId: Date.now(),
+        StyleNumber: dateNow,
         Season: seasons[0],
         Category: categories[0],
         Commodity: commodities[0],
         FabricType: fabricTypes[0],
         Silhouette: silhouettes[0],
-        SizeRange: sizes[0]
+        SizeRange: sizes[0],
+        Vendor: vendors[0]
     });
 
 
-    const submitStyleData = async () => {
+    const submitStyleData = async (styleData) => {
         try {
             const res = await axios.post(
                 (BACKEND_URL_STYLES + '/add'), 
-                newStyle,
+                styleData,
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
@@ -66,7 +69,7 @@ function CreateStyle( props ) {
                 }
             );
             
-            console.log(newStyle);
+            console.log(styleData);
             console.log('Response: ' + JSON.stringify(res.data) );
             setPostResponse(JSON.stringify(res.data));
 
@@ -86,12 +89,12 @@ function CreateStyle( props ) {
   
         setNewStyle({
           ...newStyle,
-          [event.target.name]: value
+        [event.target.name]: value
         });
     }
 
-    const handleDatePickerChange = (value, name) => {
 
+    const handleDatePickerChange = (value, name) => {
         setNewStyle({
             ...newStyle,
             [name]: value
@@ -101,7 +104,12 @@ function CreateStyle( props ) {
     const handleSubmitNewStyle = event => {
         event.preventDefault();
 
-        submitStyleData();
+        const styleData = {
+            StyleId: dateNow,
+            StyleInfo: newStyle
+        }
+
+        submitStyleData(styleData);
         
     }
 

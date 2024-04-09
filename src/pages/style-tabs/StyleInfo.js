@@ -24,35 +24,62 @@ import {
 
 function StyleInfo( props ){
 
-    const { styleDetails, token } = props;
+    const { styleid, styleDetails, token } = props;
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
 
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
     const navigate = useNavigate()
-
+    
+    // Handle form change to edit style info
     const handleEditChange = event => {
         const value = event.target.value
   
         setEditValues({
           ...editValues,
-          [event.target.name]: value
+        [event.target.name]: value
         });
     }
 
     const handleEditDatePickerChange = (value, name) => {
-
         setEditValues({
             ...editValues,
             [name]: value
         })
     }
 
+    // Push edited style info to database
+    const updateStyle = async (styleid) => {
+
+        const StyleId = parseInt(styleid);
+
+        const values = {
+            "StyleId": StyleId,
+            "StyleInfo": editValues
+        }
+
+        try{
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + `/update/${StyleId}`),
+                values,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+            setEditMode(false);
+            navigate(0);
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }
+    }
+
+    // Delete style from database
     const deleteStyle = async (styleid) => {
 
-        const StyleId= JSON.stringify(styleid);
-
-        console.log(StyleId);
+        const StyleId = parseInt(styleid)
 
         try{
             const res = await axios.delete(
@@ -64,19 +91,20 @@ function StyleInfo( props ){
                 }
             )
             console.log('Response: ' + JSON.stringify(res.data));
-
-            navigate('/home');
+            navigate("/home");
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }
     }
 
+    // To be worked on...
     const handleDeleteStyle = event => {
         event.preventDefault();
 
         //In popup, ask user to confirm. Then show feedback message that style has been deleted.
 
-        deleteStyle(styleDetails.StyleId);
+        //After confirmation
+        deleteStyle(styleid);
     }
 
     return(
@@ -104,7 +132,7 @@ function StyleInfo( props ){
                             Discard Edits
                         </Button>
 
-                        <Button color="primary" variant="contained" sx={{mx: 2}} onClick={()=>setEditMode(false)}>
+                        <Button color="primary" variant="contained" sx={{mx: 2}} onClick={()=>updateStyle(styleid)}>
                             Save Edits
                         </Button>       
                     </>   
@@ -127,7 +155,8 @@ function StyleInfo( props ){
                         <>
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="primary">
-                                    {styleDetails.Season}   {styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''} - <b>{styleDetails.Category}</b>
+                                    {styleDetails.Season}
+                                    {/* {styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''} - <b>{styleDetails.Category}</b> */}
                                 </Typography>
                             </Grid>
 
@@ -139,12 +168,12 @@ function StyleInfo( props ){
 
                             <Grid item xs={12} mb={2}>
                                 <Typography variant="body1" color="#1976d2">
-                                    Style ID: <b>{styleDetails.StyleId}</b>
+                                    Style ID: <b>{styleDetails.StyleNumber}</b>
                                 </Typography>
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="black">
-                                    Delivery Date: <b>{styleDetails.DeliveryDate.slice(0,10)}</b>
+                                    {/* Delivery Date: <b>{styleDetails.DeliveryDate.slice(0,10)}</b> */}
                                 </Typography>
                             </Grid>
 

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import axios from 'axios';
+// import { itemToData } from 'dynamo-converters';
 import StyleInfo from './style-tabs/StyleInfo';
 import StyleMenu from './style-tabs/StyleMenu';
+import StyleSamples from './style-tabs/StyleSamples';
 import { 
     StylePageLayout,
 } from "core";
@@ -10,6 +12,7 @@ import {
 
 function StylePage( props ) {
 
+    const [tab, setTab] = useState("Overview");
     const [token, setToken] = useState(window.localStorage.getItem('mini-plm-access') ?? '');
 
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
@@ -34,7 +37,10 @@ function StylePage( props ) {
                 }
             )
             console.log('Response: ' + JSON.stringify(res.data));
-            setCurrentStyle((res.data)["Item"]);
+
+            setCurrentStyle((res.data)["Item"]["StyleInfo"])
+
+            console.log(currentStyle);
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
@@ -45,8 +51,6 @@ function StylePage( props ) {
 
     useEffect(()=>{
         fetchStyle(styleid, token);
-
-        //useEffect cleanup function
         return() => controller.abort();
     }, [token]);
 
@@ -57,14 +61,23 @@ function StylePage( props ) {
                 <StyleMenu
                     styleid={styleid}
                     stylename={currentStyle.StyleName}
+                    tab={tab}
+                    setTab={setTab}
                     {...props}
                 />
 
-                <StyleInfo
-                    styleDetails = {currentStyle}
-                    token = {token}
-                    {...props}
-                /> 
+                { tab==="Overview" &&
+                    <StyleInfo
+                        styleid={styleid}
+                        styleDetails = {currentStyle}
+                        token = {token}
+                        {...props}
+                    />
+                } 
+
+                { tab==="Samples" && 
+                    <StyleSamples/>
+                }
             </StylePageLayout>
         }
         </>
