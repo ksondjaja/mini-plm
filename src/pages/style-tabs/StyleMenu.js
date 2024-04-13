@@ -27,7 +27,7 @@ function StyleMenu(props) {
         {id: 1, name: "Overview", tab:"Overview"},
         {id: 2, name: "Images", tab: "Images"},
         {id: 3, name: "Samples", tab: "Samples"},
-        {id: 4, name: "Grading", tab: "Grading"},
+        {id: 4, name: "Specs", tab: "Specs"},
         {id: 5, name: "BOM", tab: "BOM"},
         {id: 6, name: "Construction", tab: "Construction"},
         {id: 7, name: "Costs", url: "Costs"},
@@ -61,7 +61,7 @@ function StyleMenu(props) {
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", width: "100%"}}>
                     <Typography variant="body1" color="black">
-                        [{props.styleid}] {props.stylename} &gt; Overview
+                        [{props.styleid}] {props.stylename} &gt; {props.tab}
                     </Typography>
                 </Box>
             </Toolbar>

@@ -5,6 +5,7 @@ import axios from 'axios';
 import StyleInfo from './style-tabs/StyleInfo';
 import StyleMenu from './style-tabs/StyleMenu';
 import StyleSamples from './style-tabs/StyleSamples';
+import StyleSpecs from './style-tabs/StyleSpecs';
 import { 
     StylePageLayout,
 } from "core";
@@ -77,6 +78,10 @@ function StylePage( props ) {
 
                 { tab==="Samples" && 
                     <StyleSamples/>
+                }
+
+                { tab==="Specs" &&
+                    <StyleSpecs/>
                 }
             </StylePageLayout>
         }

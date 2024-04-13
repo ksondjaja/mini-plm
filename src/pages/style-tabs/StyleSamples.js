@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import dayjs from 'dayjs';
-import SamplesHistory from "./Samples/SamplesHistory";
+import CreateSampleDialog from "./Samples/CreateSampleDialog.js";
 import { 
     StyleAttribute
 } from "core";
@@ -15,6 +15,7 @@ import {
     Typography,
     Button
 } from '@mui/material';
+
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import {
@@ -28,17 +29,10 @@ function StyleSamples( props ){
     return(
         <>
             <Grid container>
-                {/* Toggle between the two pages */}
-                <Grid item xs={6}>
-                    History
-                </Grid>
-                <Grid item xs={6}>
-                    Specs
-                </Grid>
+                <CreateSampleDialog 
+                    {...props}
+                />
             </Grid>
-            {/* Show either History page or Specs page */}
-
-            <SamplesHistory />
         </>
     )
 }
