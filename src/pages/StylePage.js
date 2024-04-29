@@ -5,7 +5,7 @@ import axios from 'axios';
 import StyleInfo from './style-tabs/StyleInfo';
 import StyleMenu from './style-tabs/StyleMenu';
 import StyleSamples from './style-tabs/StyleSamples';
-import StyleSpecs from './style-tabs/StyleSpecs';
+import StyleSpecs from './style-tabs/SamplePages/SampleMenu';
 import { 
     StylePageLayout,
 } from "core";

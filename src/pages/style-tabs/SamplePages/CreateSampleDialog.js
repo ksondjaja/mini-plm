@@ -21,8 +21,10 @@ import {
 
 function CreateSampleDialog( props ){
 
+    const { WO, setWO, handleCreateSample } = props
+
     const [showDialog, setShowDialog] = useState(false);
-    const [WO, setWO] = useState("SMS");
+    
 
     const handleOpenDialog = event => {
         setShowDialog(true);
@@ -39,15 +41,12 @@ function CreateSampleDialog( props ){
     const handleClickNext = event => {
         event.preventDefault();
 
-        if(WO==="Fit"){
-            setShowDialog(0);
+        setShowDialog(0);
 
-            //Change default Fit number depending on other samples already created
-            //Below is to be edited
-            setWO("Fit1");
-        }else{
-            setShowDialog(false);
-        }
+        //Change default Fit number depending on other samples already created
+        //Below is to be edited
+        setWO("Fit1");
+
     }
 
     const handleChangeFit = event => {
@@ -99,9 +98,19 @@ function CreateSampleDialog( props ){
                         </Grid>
                         
                         <Grid item mt={3} display="flex" justifyContent="center">
+                            {WO==="Fit"?
                             <Button color="primary" variant="contained" onClick={handleClickNext}>
                                 Next
                             </Button>
+                            :
+                            <Button color="primary" variant="contained" onClick={()=>{
+                                handleCreateSample(WO);
+                                setShowDialog(false);
+                            }}>
+                                Create
+                            </Button>
+                            }
+                            
                         </Grid>
                     </FormControl>
                 </Grid>
@@ -133,7 +142,10 @@ function CreateSampleDialog( props ){
                         <Button color="primary" variant="outlined" sx={{m:1}} onClick={handleOpenDialog}>
                             Back
                         </Button>
-                        <Button color="primary" variant="contained" sx={{m:1}} onClick={()=>{setShowDialog(false)}}>
+                        <Button color="primary" variant="contained" sx={{m:1}} onClick={()=>{
+                                handleCreateSample(WO);
+                                setShowDialog(false);
+                            }}>
                             Create
                         </Button>
                     </Grid>

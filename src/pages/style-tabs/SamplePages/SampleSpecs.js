@@ -23,7 +23,7 @@ import {
 } from '@mui/x-data-grid';
 
 
-export default function SpecsHistory ( props ){
+export default function SampleSpecs ( props ){
 
   const [tableData, setTableData] = useState([
     // {
@@ -95,6 +95,7 @@ export default function SpecsHistory ( props ){
       type: 'actions',
       headerName: '',
       align: 'left',
+      width: 20,
       disableColumnMenu: true,
       renderCell: ({ id }) => {
         return(
@@ -119,7 +120,7 @@ export default function SpecsHistory ( props ){
     { 
       field: 'pom',
       headerName: 'Point of Measure',
-      width: 300,
+      width: 280,
       editable: true
     },
     {
@@ -155,8 +156,8 @@ export default function SpecsHistory ( props ){
   ]
 
     return(
-        <Grid container spacing={2}>
-            <Grid item xs={6}>
+        <Grid container spacing={1}>
+            <Grid item xs={6.1}>
                 <DataGrid rows={tableData} columns={initColumns}
                   processRowUpdate={(updatedRow, originalRow)=>{
                     return saveUpdatedRow(updatedRow)
@@ -181,7 +182,7 @@ export default function SpecsHistory ( props ){
             <Grid item xs={6}>
 
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} mt={1}>
               <Button color="primary" variant="contained" onClick={handleAddPOM}>
                 Add POM
               </Button>
