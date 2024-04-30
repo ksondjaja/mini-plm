@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import moment from 'moment';
-import SampleMenu from "./SamplePages/SampleMenu";
 import CreateSampleDialog from "./SamplePages/CreateSampleDialog.js";
 import SampleSpecs from "./SamplePages/SampleSpecs";
 import { 
-    StyleAttribute
+    StyleMenu
 } from "core";
 import {
     Grid,
@@ -28,7 +27,9 @@ import {
 
 function StyleSamples( props ){
 
-    const [sampleTab, setSampleTab] = useState('history')
+    const sampleLinks = ['History', 'Specs', 'Grading']
+
+    const [sampleTab, setSampleTab] = useState('History')
 
     const [samples, setSamples] = useState([])
     const [WO, setWO] = useState("SMS");
@@ -47,12 +48,15 @@ function StyleSamples( props ){
 
     return(
         <>
-            <SampleMenu
-                sampleTab = {sampleTab}
-                setSampleTab = {setSampleTab}
+            <StyleMenu
+                alignment = 'flex-start'
+                styleLinks = {sampleLinks}
+                tab = {sampleTab}
+                setTab = {setSampleTab}
+                {...props}
             />
 
-            {sampleTab==='history' &&
+            {sampleTab==='History' &&
                 <Grid container spacing={2}>
                     {(samples.length>0)&&
                     samples.map((s,i)=>(
@@ -77,12 +81,8 @@ function StyleSamples( props ){
                 </Grid>
             }
 
-            { sampleTab==='specs' &&
-                <Grid container>
-                    <Grid item xs={12}>
-                        <SampleSpecs/>
-                    </Grid>
-                </Grid>
+            { sampleTab==='Specs' &&
+                <SampleSpecs/>
             }
             
         </>

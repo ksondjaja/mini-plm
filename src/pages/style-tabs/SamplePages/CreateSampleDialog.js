@@ -64,7 +64,7 @@ function CreateSampleDialog( props ){
 
         <Grid item>
             <Button color="primary" variant="contained" onClick={handleOpenDialog}>
-                Create Sample Specs
+                Add Sample Specs
             </Button>
         </Grid>
         <Dialog

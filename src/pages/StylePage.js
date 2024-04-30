@@ -3,11 +3,10 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 // import { itemToData } from 'dynamo-converters';
 import StyleInfo from './style-tabs/StyleInfo';
-import StyleMenu from './style-tabs/StyleMenu';
 import StyleSamples from './style-tabs/StyleSamples';
-import StyleSpecs from './style-tabs/SamplePages/SampleMenu';
 import { 
     StylePageLayout,
+    StyleMenu
 } from "core";
 
 
@@ -25,6 +24,8 @@ function StylePage( props ) {
     const controller = new AbortController();
 
     const styleid = params["id"];
+
+    const styleLinks = ['Overview', 'Images', 'Samples', 'BOM', 'Construction', 'Costs']
 
     const fetchStyle = async (styleid, token) => {
   
@@ -60,10 +61,13 @@ function StylePage( props ) {
         {!loading &&
             <StylePageLayout>
                 <StyleMenu
+                    mode='stylePage'
                     styleid={styleid}
                     stylename={currentStyle.StyleName}
-                    tab={tab}
-                    setTab={setTab}
+                    alignment="flex-end"
+                    styleLinks = {styleLinks}
+                    tab = {tab}
+                    setTab = {setTab}
                     {...props}
                 />
 
@@ -77,11 +81,11 @@ function StylePage( props ) {
                 } 
 
                 { tab==="Samples" && 
-                    <StyleSamples/>
-                }
-
-                { tab==="Specs" &&
-                    <StyleSpecs/>
+                    <StyleSamples
+                        styleid={styleid}
+                        token={token}
+                        {...props}
+                    />
                 }
             </StylePageLayout>
         }
