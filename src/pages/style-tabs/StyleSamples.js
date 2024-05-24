@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import moment from 'moment';
@@ -27,24 +27,104 @@ import {
 
 function StyleSamples( props ){
 
-    const sampleLinks = ['History', 'Specs', 'Grading']
+    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
-    const [sampleTab, setSampleTab] = useState('History')
+    const { styleid, token } = props;
 
-    const [samples, setSamples] = useState([])
+    const sampleLinks = ['History', 'Specs', 'Grading'];
+
+    const [sampleTab, setSampleTab] = useState('History');
+
+    const [samples, setSamples] = useState([]);
     const [WO, setWO] = useState("SMS");
 
-    const handleCreateSample = (WO) => {
+    const [postResponse, setPostResponse] = useState();
+    const [postError, setPostError] = useState();
+    const [postLoading, setPostLoading] = useState();
+
+    const [loading, setLoading] = useState(true);
+    const controller = new AbortController();
+
+
+    const Style = {
+        StyleId: styleid,
+        Attributes: "StyleSamples"
+    }
+
+    const fetchSamples = async (style, token) => {
+  
+        try{
+            const res = await axios.get(
+                (BACKEND_URL_STYLES + `/${style.StyleId}`),
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    },
+                    params: {
+                        attributes: style
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+
+            setSamples((res.data)["Item"]["StyleSamples"])
+
+            console.log(samples);
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }finally{
+            setLoading(false);
+        }
+    }
+
+    const submitCreateSample = async (wo) => {
+        try {
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + '/addSample'), 
+                wo,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            );
+            
+            console.log(wo);
+            console.log('Response: ' + JSON.stringify(res.data) );
+            setPostResponse(JSON.stringify(res.data));
+
+        } catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+            setPostError(JSON.stringify(err.message));
+        } finally {
+            setPostLoading(false);
+            setWO('null');
+            fetchSamples(Style, token);
+        }
+    }
+
+    const handleCreateSample = () => {
 
         const WOInfo = {
-            id: samples.length + 1,
-            WO: WO,
-            DateCreated: Date.now(),
-            SampleReceived: null,
+            StyleId: styleid,
+            SampleInfo:[{
+                id: samples.length + 1,
+                WO: WO,
+                DateCreated: Date.now(),
+                SampleReceived: null,
+                SampleSpecs: {}
+            }]
         }
 
-        setSamples(samples => [...samples, WOInfo])
+        submitCreateSample(WOInfo);
+        //setSamples(samples => [...samples, WOInfo])
+        
     }
+
+    useEffect(()=>{
+        fetchSamples(Style, token);
+        return() => controller.abort();
+    }, [token]);
 
     return(
         <>
@@ -74,7 +154,7 @@ function StyleSamples( props ){
                         <CreateSampleDialog
                             handleCreateSample = {handleCreateSample}
                             WO = {WO}
-                            setWO = {setWO} 
+                            setWO = {setWO}
                             {...props}
                         />
                     </Grid>

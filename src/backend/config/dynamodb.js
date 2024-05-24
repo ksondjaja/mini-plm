@@ -32,10 +32,9 @@ const dynamoClient = DynamoDBDocument.from(new DynamoDB());
 const TABLE_STYLES = "mini-plm-styles";
 
 
-// STUFF TO EDIT
-// Save all info from Create Style inside StyleInfo attribute
-// Generate a StyleID from Date.now(), also save it inside StyleInfo as StyleNumber
-// Create a function to get only StyleInfo
+// TO-DO LIST
+// Create method to save Work Orders/Sample status
+// Create method to save Sample Specs
 
 
 // Get Styles to display in Home page
@@ -52,16 +51,22 @@ const getStylesPreview = async () => {
 // Can also use ScanCommand to filter items based on attribute values
 
 
-// Get general Style Info by StyleId
-const getStyleById = async (styleid) => {
+// Get any style attributes by Style Id (i.e. enter wanted item under Attributes)
+// This include Sample info or any nested attribute
 
-    const StyleId = parseInt(styleid);
+const getStyleById = async (style) => {
+
+    const StyleAttributes = style.Attributes;
+    const StyleId = parseInt(style.StyleId);
+
+    //console.log(StyleAttributes);
 
     const command = new GetCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId
-        }
+        },
+        ProjectionExpression: StyleAttributes
     });
 
     console.log(command);
@@ -83,7 +88,10 @@ const addStyle = async (style) => {
         TableName: TABLE_STYLES,
         Item: {
             "StyleId": id,
-            "StyleInfo": info
+            "StyleInfo": info,
+            "StyleSamples": [],
+            "StyleGrading": null,
+            "StyleImages": null
         }
     });
 
@@ -92,7 +100,7 @@ const addStyle = async (style) => {
     return await dynamoClient.send(command);
 }
 
-//Update general Style Info
+// Update general Style Info
 const editInfo = async(values) => {
 
     const command = new UpdateCommand({
@@ -125,26 +133,66 @@ const deleteStyleById = async (styleid) => {
     return await dynamoClient.send(command);
 }
 
+// Create a new Sample/Work Order for an existing style
+const addSampleById = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId
+        },
+        UpdateExpression: "SET StyleSamples = list_append(StyleSamples, :newSample)",
+        ExpressionAttributeValues: {
+            ":newSample": values.SampleInfo
+        }
+    })
+
+    return await dynamoClient.send(command);
+}
+
+// Update Sample Info
+
+// Update Sample Specs
+
+// Delete a sample from an existing style
+const deleteSampleById = async(values) => {
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": values.StyleId
+        },
+        UpdateExpression: "DELETE StyleSamples[:sample]",
+        ExpressionAttributeValues: {
+            ":sample": values.Sample
+        },
+        ReturnValues: "ALL_NEW"
+    })
+
+    return await dynamoClient.send(command);
+}
 
 // Create new Work Order/Sample for a style
 // Edit a single attribute in a Style. But put an entire chart object (Hashmap?) of specs/BOM for the attribute.
 // HOW TO EDIT/ADD/REMOVE A SPECIFIC WORK ORDER? MAYBE NEED A SEPARATE METHOD FOR EACH
 
-const addWorkOrder = async(values) => {
+// const addWorkOrder = async(values) => {
 
-    const params = new UpdateCommand({
-        TableName: TABLE_STYLES,
-        Key: {
-            "StyleId": values.StyleId
-        },
-        UpdateExpression: "SET StyleWorkOrder = :StyleWorkOrder",
-        ExpressionAttributeValues: {
-            ":StyleWorkOrder": values.StyleInfo
-        }
-    })
+//     const params = new UpdateCommand({
+//         TableName: TABLE_STYLES,
+//         Key: {
+//             "StyleId": values.StyleId
+//         },
+//         UpdateExpression: "SET StyleWorkOrder = :StyleWorkOrder",
+//         ExpressionAttributeValues: {
+//             ":StyleWorkOrder": values.StyleWO
+//         }
+//     })
 
-    return await dynamoClient.send(params);
-}
+//     return await dynamoClient.send(params);
+// }
 
 
 module.exports = {
@@ -153,6 +201,7 @@ module.exports = {
     getStyleById,
     addStyle,
     editInfo,
-    addWorkOrder,
-    deleteStyleById
+    deleteStyleById,
+    addSampleById,
+    deleteSampleById
 };

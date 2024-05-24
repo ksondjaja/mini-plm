@@ -23,18 +23,26 @@ function StylePage( props ) {
     const params = useParams();
     const controller = new AbortController();
 
+    const Style = {
+        StyleId: params["id"],
+        Attributes: "StyleInfo, StyleImages"
+    }
+
     const styleid = params["id"];
 
     const styleLinks = ['Overview', 'Images', 'Samples', 'BOM', 'Construction', 'Costs']
 
-    const fetchStyle = async (styleid, token) => {
+    const fetchStyle = async (style, token) => {
   
         try{
             const res = await axios.get(
-                (BACKEND_URL_STYLES + `/${styleid}`),
+                (BACKEND_URL_STYLES + `/${style.StyleId}`),
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
+                    },
+                    params: {
+                        attributes: style
                     }
                 }
             )
@@ -52,7 +60,7 @@ function StylePage( props ) {
     
 
     useEffect(()=>{
-        fetchStyle(styleid, token);
+        fetchStyle(Style, token);
         return() => controller.abort();
     }, [token]);
 

@@ -143,7 +143,7 @@ function CreateSampleDialog( props ){
                             Back
                         </Button>
                         <Button color="primary" variant="contained" sx={{m:1}} onClick={()=>{
-                                handleCreateSample(WO);
+                                handleCreateSample();
                                 setShowDialog(false);
                             }}>
                             Create

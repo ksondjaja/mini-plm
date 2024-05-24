@@ -7,7 +7,9 @@ const {
     getStyleById,
     addStyle,
     editInfo,
-    deleteStyleById
+    deleteStyleById,
+    addSampleById,
+    deleteSampleById
 } = require('../config/dynamodb');
 
 const router = express.Router();
@@ -30,13 +32,16 @@ router.get('/', async (req, res) => {
 })
 
 
-// api endpoint to get Style by StyleId
+// api endpoint to get any Style's attributes by StyleId
+
 router.get('/:id', async (req, res) => {
     
-    const StyleId = req.params.id;
+    const Style = req.query.attributes;
+    console.log(Style);
 
     try {
-        const style = await getStyleById(StyleId);
+        const style = await getStyleById(Style);
+        console.log(style);
         res.json(style);
     } catch (err) {
         console.error(err);
@@ -44,8 +49,22 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+// router.get('/:id', async (req, res) => {
+    
+//     const Style = req.body
 
-// api endpoint to post/add new Style
+//     try {
+//         const style = await getStyleById(Style);
+//         console.log(style);
+//         res.json(style);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({err: `Something went wrong`});
+//     }
+// })
+
+
+// api endpoint to add new Style
 router.post('/add', async (req, res) => {
 
     const style = req.body;
@@ -63,7 +82,7 @@ router.post('/add', async (req, res) => {
 })
 
 
-// Update a lot of attributes in a Style by Id (replaces exsting entry with newer version of info)
+// Update Style Info by Id (replaces exsting entry with newer version of info)
 router.post('/update/:id', async(req, res) => {
 
     const style = req.body;
@@ -79,7 +98,7 @@ router.post('/update/:id', async(req, res) => {
 
 })
 
-
+// Delete a style by Style Id
 router.delete('/delete/:id', async (req, res) => {
 
     const StyleId = req.params.id;
@@ -90,6 +109,23 @@ router.delete('/delete/:id', async (req, res) => {
         res.json(style);
 
         console.log('Deleted: '+ StyleId)
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
+
+router.post('/addSample', async (req, res) => {
+
+    const sample = req.body;
+    console.log(sample);
+
+    try {
+        const newSample = await addSampleById(sample);
+        
+        res.json(newSample);
+
+        console.log(newSample);
     } catch (err) {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
