@@ -159,14 +159,16 @@ const addSampleById = async(values) => {
 // Delete a sample from an existing style
 const deleteSampleById = async(values) => {
 
+    const StyleId = parseInt(values.StyleId);
+
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
-            "StyleId": values.StyleId
+            "StyleId": StyleId
         },
         UpdateExpression: "DELETE StyleSamples[:sample]",
         ExpressionAttributeValues: {
-            ":sample": values.Sample
+            ":sample": values.SampleType
         },
         ReturnValues: "ALL_NEW"
     })

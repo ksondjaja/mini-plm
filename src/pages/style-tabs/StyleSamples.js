@@ -162,7 +162,10 @@ function StyleSamples( props ){
             }
 
             { sampleTab==='Specs' &&
-                <SampleSpecs/>
+                <SampleSpecs
+                    fetchSamples = {fetchSamples}
+                    {...props}
+                />
             }
             
         </>

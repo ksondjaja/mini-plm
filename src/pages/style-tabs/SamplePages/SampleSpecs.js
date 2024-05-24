@@ -25,6 +25,8 @@ import {
 
 export default function SampleSpecs ( props ){
 
+  // Show more columns based on Samples created
+
   const [tableData, setTableData] = useState([
     // {
     //   id: 1,
