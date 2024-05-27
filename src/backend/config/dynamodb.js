@@ -11,6 +11,7 @@ const { DynamoDBDocument,
  } = require("@aws-sdk/lib-dynamodb");
 
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
+const { ConstructionOutlined } = require('@mui/icons-material');
 
 const variables = require('dotenv').config({ path: '../../.env.local' });
 
@@ -156,7 +157,7 @@ const addSampleById = async(values) => {
 
 // Update Sample Specs
 
-// Delete a sample from an existing style
+// Delete a sample from an existing style -- NEED TO TEST
 const deleteSampleById = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
@@ -176,25 +177,64 @@ const deleteSampleById = async(values) => {
     return await dynamoClient.send(command);
 }
 
-// Create new Work Order/Sample for a style
-// Edit a single attribute in a Style. But put an entire chart object (Hashmap?) of specs/BOM for the attribute.
-// HOW TO EDIT/ADD/REMOVE A SPECIFIC WORK ORDER? MAYBE NEED A SEPARATE METHOD FOR EACH
+// Add a row of Spec
+// const addSpecRow = async(values) => {
 
-// const addWorkOrder = async(values) => {
+//     const StyleId = parseInt(values.StyleId);
+//     const MeasType = values.NewRow.MeasType;
 
-//     const params = new UpdateCommand({
+//     const command = new UpdateCommand({
 //         TableName: TABLE_STYLES,
 //         Key: {
-//             "StyleId": values.StyleId
+//             "StyleId": StyleId
 //         },
-//         UpdateExpression: "SET StyleWorkOrder = :StyleWorkOrder",
+//         UpdateExpression: "SET StyleSamples.#SampleStatus.#MeasType = :NewRow",
+//         ExpressionAttributeNames:{
+//             "#SampleStatus" : values.NewRow.SampleStatus,
+//             "#MeasType" : MeasType
+//         },
 //         ExpressionAttributeValues: {
-//             ":StyleWorkOrder": values.StyleWO
+//             ":NewRow": values.NewRow
 //         }
 //     })
 
-//     return await dynamoClient.send(params);
+//     return await dynamoClient.send(command);
 // }
+
+// Update a row of Spec
+// FIX 'CONDITIONAL REQUEST FAILED' -- syntax?
+const updateSpecRow = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+    console.log(StyleId);
+
+    console.log(values.SampleStatus);
+    console.log(values.MeasType);
+
+    const UpdatedRowIndex = parseInt(values.UpdatedRow.id)-1;
+    console.log(UpdatedRowIndex);
+
+    console.log(values.UpdatedRow);
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId,
+        },
+        UpdateExpression: `SET StyleSamples.SampleSpecs.#MeasType[${UpdatedRowIndex}] = :UpdatedRow`,
+        ConditionExpression: "#Sample = :SampleStatus",
+        ExpressionAttributeNames:{
+            "#Sample" : "StyleSamples.SampleType",
+            "#MeasType" : values.MeasType
+        },
+        ExpressionAttributeValues: {
+            ":SampleStatus" : values.SampleStatus,
+            ":UpdatedRow": values.UpdatedRow
+        }
+    })
+
+    return await dynamoClient.send(command);
+}
 
 
 module.exports = {
@@ -205,5 +245,7 @@ module.exports = {
     editInfo,
     deleteStyleById,
     addSampleById,
-    deleteSampleById
+    deleteSampleById,
+    //addSpecRow,
+    updateSpecRow
 };

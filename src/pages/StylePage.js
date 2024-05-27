@@ -92,6 +92,7 @@ function StylePage( props ) {
                     <StyleSamples
                         styleid={styleid}
                         token={token}
+                        BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
                         {...props}
                     />
                 }

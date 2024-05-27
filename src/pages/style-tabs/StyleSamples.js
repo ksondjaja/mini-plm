@@ -27,9 +27,7 @@ import {
 
 function StyleSamples( props ){
 
-    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
-
-    const { styleid, token } = props;
+    const { BACKEND_URL_STYLES, styleid, token } = props;
 
     const sampleLinks = ['History', 'Specs', 'Grading'];
 
@@ -109,10 +107,15 @@ function StyleSamples( props ){
             StyleId: styleid,
             SampleInfo:[{
                 id: samples.length + 1,
-                WO: WO,
+                SampleType: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
-                SampleSpecs: {}
+                SampleSpecs: {
+                    "initSpec": [],
+                    "vdr": [],
+                    "bo": [],
+                    "revSpec": []
+                }
             }]
         }
 
@@ -142,7 +145,7 @@ function StyleSamples( props ){
                     samples.map((s,i)=>(
                         <Grid item xs={2} key={i}>
                             <Typography variant="body1" color="black">
-                            {s.WO}
+                            {s.SampleType}
                             <br/>
                             Spec Created: {moment(s.DateCreated).format('MMMM DD YYYY')}
                             <br/>
@@ -163,7 +166,10 @@ function StyleSamples( props ){
 
             { sampleTab==='Specs' &&
                 <SampleSpecs
+                    token = {token}
+                    styleid = {styleid}
                     fetchSamples = {fetchSamples}
+                    BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
                     {...props}
                 />
             }

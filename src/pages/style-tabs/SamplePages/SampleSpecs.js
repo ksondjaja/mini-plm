@@ -25,6 +25,15 @@ import {
 
 export default function SampleSpecs ( props ){
 
+  const { token, styleid, fetchSamples, BACKEND_URL_STYLES } = props;
+
+  const [postResponse, setPostResponse] = useState();
+  const [postError, setPostError] = useState();
+  const [postLoading, setPostLoading] = useState();
+
+  const [sampleStatus, setSampleStatus] = useState('SMS');
+  const [measType, setMeasType] = useState('initSpec');
+
   // Show more columns based on Samples created
 
   const [tableData, setTableData] = useState([
@@ -51,18 +60,52 @@ export default function SampleSpecs ( props ){
   const [rowCount, setRowCount] = useState(tableData.length)
   //const [error, setError] = useState()
 
+  const submitRowUpdate = async (row) => {
+    try {
+        const res = await axios.post(
+            (BACKEND_URL_STYLES + '/updateSpecRow'), 
+            row,
+            {
+                headers: {
+                    Authorization: 'Bearer ' + token
+                }
+            }
+        );
+        console.log(row);
+        console.log('Response: ' + JSON.stringify(res.data) );
+        setPostResponse(JSON.stringify(res.data));
+
+    } catch(err){
+        console.log('Error: ' + JSON.stringify(err.message));
+        setPostError(JSON.stringify(err.message));
+    } finally {
+        setPostLoading(false);
+        //fetchSamples(Style, token);
+    }
+}
+
 
   const saveUpdatedRow = (updatedRow) => {
 
-    const rowId = parseInt(updatedRow.id);
+    console.log(updatedRow);
 
-    //console.log(rowId);
+    //const rowId = parseInt(updatedRow.id);
 
-    let newTable = tableData;
+    const updatedData = {
+      StyleId: styleid,
+      MeasType: measType,
+      SampleStatus: sampleStatus,
+      UpdatedRow: updatedRow
+    }
 
-    newTable[rowId-1] = updatedRow;
 
-    setTableData(newTable);
+    //let newTable = tableData;
+
+    //newTable[rowId-1] = updatedRow;
+
+    //setTableData(newTable);
+
+    submitRowUpdate(updatedData)
 
     return(updatedRow)
   }
@@ -73,7 +116,32 @@ export default function SampleSpecs ( props ){
 
   const handleDeleteClick = (id: GridRowId) => () => {
     setTableData(tableData.filter((row) => row.id !== id));
+    setRowCount(rowCount-1)
   };
+
+//   const submitRowAdd = async (row) => {
+//     try {
+//         const res = await axios.post(
+//             (BACKEND_URL_STYLES + '/addSpecRow'), 
+//             row,
+//             {
+//                 headers: {
+//                     Authorization: 'Bearer ' + token
+//                 }
+//             }
+//         );
+//         console.log(row);
+//         console.log('Response: ' + JSON.stringify(res.data) );
+//         setPostResponse(JSON.stringify(res.data));
+
+//     } catch(err){
+//         console.log('Error: ' + JSON.stringify(err.message));
+//         setPostError(JSON.stringify(err.message));
+//     } finally {
+//         setPostLoading(false);
+//         //fetchSamples(Style, token);
+//     }
+//  }
   
   const handleAddPOM = () => {
 
@@ -81,14 +149,24 @@ export default function SampleSpecs ( props ){
       id: parseInt(rowCount+1),
       code: '',
       pom: '',
-      init: 0
+      meas: 0
     }
+
+    // const rowData = {
+    //   StyleId: styleid,
+    //   MeasType: measType,
+    //   SampleStatus: sampleStatus,
+    //   NewRow: newPOM,
+    // }
 
     setTableData(
       tableData => [...tableData, newPOM]
     )
 
     setRowCount(rowCount+1)
+
+    //submitRowAdd(rowData);
+
   }
 
   const initColumns: GridColDef[] = [
@@ -126,8 +204,29 @@ export default function SampleSpecs ( props ){
       editable: true
     },
     {
-      field: 'init',
+      field: 'initSpec',
       headerName: 'Initial Specs',
+      editable: true,
+      width: 100,
+      disableColumnMenu: true
+    },
+    {
+      field: 'vdr',
+      headerName: 'Vendor Msmt',
+      editable: true,
+      width: 100,
+      disableColumnMenu: true
+    },
+    {
+      field: 'bo',
+      headerName: 'BO Msmt',
+      editable: true,
+      width: 100,
+      disableColumnMenu: true
+    },
+    {
+      field: 'revSpec',
+      headerName: 'Revised Specs',
       editable: true,
       width: 100,
       disableColumnMenu: true

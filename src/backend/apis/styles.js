@@ -9,7 +9,9 @@ const {
     editInfo,
     deleteStyleById,
     addSampleById,
-    deleteSampleById
+    deleteSampleById,
+    //addSpecRow,
+    updateSpecRow
 } = require('../config/dynamodb');
 
 const router = express.Router();
@@ -115,17 +117,51 @@ router.delete('/delete/:id', async (req, res) => {
     }
 })
 
+// Add new Sample by Style Id
 router.post('/addSample', async (req, res) => {
 
     const sample = req.body;
-    console.log(sample);
 
     try {
         const newSample = await addSampleById(sample);
-        
         res.json(newSample);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
 
-        console.log(newSample);
+// Delete a sample by Style Id
+
+// Add a row of Style's spec
+// router.post('/addSpecRow', async (req, res) => {
+
+//     const row = req.body;
+//     console.log(row);
+
+//     try {
+//         const newRow = await addSpecRow(row);        
+//         res.json(newRow);
+
+//         console.log(newRow);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({err: `Something went wrong`});
+//     }
+// })
+
+
+// Update a row of Style's spec
+router.post('/updateSpecRow', async (req, res) => {
+
+    const row = req.body;
+    console.log(row);
+
+    try {
+        const updatedRow = await updateSpecRow(row);        
+        res.json(updatedRow);
+
+        console.log(updatedRow);
     } catch (err) {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
