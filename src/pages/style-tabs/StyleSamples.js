@@ -66,8 +66,6 @@ function StyleSamples( props ){
             console.log('Response: ' + JSON.stringify(res.data));
 
             setSamples((res.data)["Item"]["StyleSamples"])
-
-            console.log(samples);
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
@@ -110,12 +108,15 @@ function StyleSamples( props ){
                 SampleType: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
-                SampleSpecs: {
-                    "initSpec": [],
-                    "vdr": [],
-                    "bo": [],
-                    "revSpec": []
-                }
+                SampleSpecs: [{
+                    id: 1,
+                    code: '',
+                    pom: '',
+                    init: 0,
+                    vdr: 0,
+                    bo: 0,
+                    rev: 0,
+                }]
             }]
         }
 
@@ -139,7 +140,7 @@ function StyleSamples( props ){
                 {...props}
             />
 
-            {sampleTab==='History' &&
+            {sampleTab==='History' && !loading &&
                 <Grid container spacing={2}>
                     {(samples.length>0)&&
                     samples.map((s,i)=>(

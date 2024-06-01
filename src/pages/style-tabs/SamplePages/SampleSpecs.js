@@ -1,6 +1,6 @@
 // MUI DATA GRID DOCUMENTATION: https://mui.com/x/react-data-grid/editing/
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -31,34 +31,47 @@ export default function SampleSpecs ( props ){
   const [postError, setPostError] = useState();
   const [postLoading, setPostLoading] = useState();
 
-  const [sampleStatus, setSampleStatus] = useState('SMS');
-  const [measType, setMeasType] = useState('initSpec');
+  const [loading, setLoading] = useState(true);
+    const controller = new AbortController();
 
-  // Show more columns based on Samples created
+  const [sampleNumber, setSampleNumber] = useState(0);
+  const [measType, setMeasType] = useState('init');
 
-  const [tableData, setTableData] = useState([
-    // {
-    //   id: 1,
-    //   code: 'T101',
-    //   pom: 'Front Body Length - from HPS Seam',
-    //   init: 24.5
-    // },
-    // {
-    //   id: 2,
-    //   code: 'T102',
-    //   pom: 'Back Body Length - from HPS Seam',
-    //   init: 24
-    // },
-    // {
-    //   id: 3,
-    //   code: 'T103',
-    //   pom: 'Shoulder Width - seam to seam',
-    //   init: 15
-    // }
-  ])
+  const [tableData, setTableData] = useState();
 
-  const [rowCount, setRowCount] = useState(tableData.length)
+  const [rowCount, setRowCount] = useState()
   //const [error, setError] = useState()
+
+  const Style = {
+    StyleId: styleid,
+    Attributes: "StyleSamples"
+}
+
+  const fetchSpecs = async (style, token) =>{
+    try{
+      const res = await axios.get(
+          (BACKEND_URL_STYLES + `/${style.StyleId}`),
+          {
+              headers: {
+                  Authorization: 'Bearer ' + token
+              },
+              params: {
+                  attributes: style
+              }
+          }
+      )
+      console.log('Response: ' + JSON.stringify(res.data));
+
+      const specs = (res.data)["Item"]["StyleSamples"][0]["SampleSpecs"]
+
+      setTableData(specs);
+      setRowCount(specs.length);
+  }catch(err){
+      console.log('Error: ' + JSON.stringify(err.message));
+  }finally{
+      setLoading(false);
+  }
+  }
 
   const submitRowUpdate = async (row) => {
     try {
@@ -80,68 +93,31 @@ export default function SampleSpecs ( props ){
         setPostError(JSON.stringify(err.message));
     } finally {
         setPostLoading(false);
-        //fetchSamples(Style, token);
+        //fetchSpecs(Style, token);
     }
-}
+  }
 
 
   const saveUpdatedRow = (updatedRow) => {
 
     console.log(updatedRow);
 
-    //const rowId = parseInt(updatedRow.id);
-
     const updatedData = {
       StyleId: styleid,
-      MeasType: measType,
-      SampleStatus: sampleStatus,
+      SampleNumber: sampleNumber,
       UpdatedRow: updatedRow
     }
 
-
-    //let newTable = tableData;
-
-    //newTable[rowId-1] = updatedRow;
-
-    //setTableData(newTable);
-
     submitRowUpdate(updatedData)
-
     return(updatedRow)
   }
 
-  // const handleProcessRowUpdateError = error => {
-  //   setError(error.message)
-  // }
 
   const handleDeleteClick = (id: GridRowId) => () => {
     setTableData(tableData.filter((row) => row.id !== id));
     setRowCount(rowCount-1)
   };
 
-//   const submitRowAdd = async (row) => {
-//     try {
-//         const res = await axios.post(
-//             (BACKEND_URL_STYLES + '/addSpecRow'), 
-//             row,
-//             {
-//                 headers: {
-//                     Authorization: 'Bearer ' + token
-//                 }
-//             }
-//         );
-//         console.log(row);
-//         console.log('Response: ' + JSON.stringify(res.data) );
-//         setPostResponse(JSON.stringify(res.data));
-
-//     } catch(err){
-//         console.log('Error: ' + JSON.stringify(err.message));
-//         setPostError(JSON.stringify(err.message));
-//     } finally {
-//         setPostLoading(false);
-//         //fetchSamples(Style, token);
-//     }
-//  }
   
   const handleAddPOM = () => {
 
@@ -149,23 +125,22 @@ export default function SampleSpecs ( props ){
       id: parseInt(rowCount+1),
       code: '',
       pom: '',
-      meas: 0
+      init: 0,
+      vdr: 0,
+      bo: 0,
+      rev: 0,
     }
 
-    // const rowData = {
-    //   StyleId: styleid,
-    //   MeasType: measType,
-    //   SampleStatus: sampleStatus,
-    //   NewRow: newPOM,
-    // }
+    const updatedData = {
+      StyleId: styleid,
+      MeasType: measType,
+      SampleNumber: sampleNumber,
+      UpdatedRow: newPOM
+    }
 
-    setTableData(
-      tableData => [...tableData, newPOM]
-    )
+    submitRowUpdate(updatedData)
 
     setRowCount(rowCount+1)
-
-    //submitRowAdd(rowData);
 
   }
 
@@ -204,7 +179,7 @@ export default function SampleSpecs ( props ){
       editable: true
     },
     {
-      field: 'initSpec',
+      field: 'init',
       headerName: 'Initial Specs',
       editable: true,
       width: 100,
@@ -225,7 +200,7 @@ export default function SampleSpecs ( props ){
       disableColumnMenu: true
     },
     {
-      field: 'revSpec',
+      field: 'rev',
       headerName: 'Revised Specs',
       editable: true,
       width: 100,
@@ -233,85 +208,77 @@ export default function SampleSpecs ( props ){
     },
   ];
 
-  const sampleColumns: GridColDef[] = [
-    {
-      field: 'vdr',
-      headerName: 'Vendor Msmt',
-      editable: false,
-    },
-    {
-      field: 'bo',
-      headerName: 'BO Msmt',
-      editable: true,
-    },
-    {
-      field: 'diff',
-      headerName: 'BO Diff. from Spec',
-      editable: false,
-    },
-    {
-      field: 'rev',
-      headerName: 'Revised Spec',
-      editable: false,
-    },
-  ]
+  // const sampleColumns: GridColDef[] = [
+  //   {
+  //     field: 'vdr',
+  //     headerName: 'Vendor Msmt',
+  //     editable: false,
+  //   },
+  //   {
+  //     field: 'bo',
+  //     headerName: 'BO Msmt',
+  //     editable: true,
+  //   },
+  //   {
+  //     field: 'diff',
+  //     headerName: 'BO Diff. from Spec',
+  //     editable: false,
+  //   },
+  //   {
+  //     field: 'rev',
+  //     headerName: 'Revised Spec',
+  //     editable: false,
+  //   },
+  // ]
 
-    return(
-        <Grid container spacing={1}>
-            <Grid item xs={6.1}>
-                <DataGrid rows={tableData} columns={initColumns}
-                  processRowUpdate={(updatedRow, originalRow)=>{
-                    return saveUpdatedRow(updatedRow)
-                  }}
-                  //onProcessRowUpdateError={handleProcessRowUpdateError}
-                  autoHeight={true}
-                  sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
-                  '.MuiDataGrid-footerContainer': { display: 'none' },
-                  "& .MuiDataGrid-columnHeaderTitle": {
-                    whiteSpace: "normal",
-                    lineHeight: "normal"
-                  },
-                  "& .MuiDataGrid-columnHeader": {
-                    // Forced to use important since overriding inline styles
-                    height: "unset !important"
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    // Forced to use important since overriding inline styles
-                    maxHeight: "168px !important"}}}
-                />
-            </Grid>
-            <Grid item xs={6}>
+  useEffect(()=>{
+      fetchSpecs(Style, token);
+      console.log('tableData: ' + tableData);
+      return() => controller.abort();
+  }, [token]);
 
-            </Grid>
-            <Grid item xs={12} mt={1}>
-              <Button color="primary" variant="contained" onClick={handleAddPOM}>
-                Add POM
-              </Button>
-            </Grid>
+  return(
+    
+      <Grid container spacing={1}>
 
-        </Grid>
-    )
+        {!loading &&
+
+          <>
+          {/* <p>{tableData.init}</p><br/>
+          <p>{tableData}</p><br/>
+          <p>{rowCount}</p> */}
+          <Grid item xs={12}>
+              <DataGrid rows={tableData} columns={initColumns}
+                processRowUpdate={(updatedRow, originalRow)=>{
+                  return saveUpdatedRow(updatedRow)
+                }}
+                //onProcessRowUpdateError={handleProcessRowUpdateError}
+                autoHeight={true}
+                sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
+                '.MuiDataGrid-footerContainer': { display: 'none' },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  whiteSpace: "normal",
+                  lineHeight: "normal"
+                },
+                "& .MuiDataGrid-columnHeader": {
+                  // Forced to use important since overriding inline styles
+                  height: "unset !important"
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  // Forced to use important since overriding inline styles
+                  maxHeight: "168px !important"}}}
+              />
+          </Grid>
+          <Grid item xs={6}>
+
+          </Grid>
+          <Grid item xs={12} mt={1}>
+            <Button color="primary" variant="contained" onClick={handleAddPOM}>
+              Add POM
+            </Button>
+          </Grid>
+          </>
+        }
+      </Grid>
+  )
 }
-
-
-
-  // const initRows: GridRowsProp = [
-  //   {
-  //     id: 1,
-  //     code: 'T101',
-  //     pom: 'Front Body Length - from HPS Seam',
-  //     init: 24.5
-  //   },
-  //   {
-  //     id: 2,
-  //     code: 'T102',
-  //     pom: 'Back Body Length - from HPS Seam',
-  //     init: 24
-  //   },
-  //   {
-  //     id: 3,
-  //     code: 'T103',
-  //     pom: 'Shoulder Width - seam to seam',
-  //     init: 15
-  //   },
-  // ];

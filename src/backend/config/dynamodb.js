@@ -206,29 +206,23 @@ const deleteSampleById = async(values) => {
 const updateSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
-    console.log(StyleId);
+    // console.log(StyleId);
 
-    console.log(values.SampleStatus);
-    console.log(values.MeasType);
+    const SampleNumber = parseInt(values.SampleNumber)-1;
+    // console.log(SampleNumber);
 
     const UpdatedRowIndex = parseInt(values.UpdatedRow.id)-1;
-    console.log(UpdatedRowIndex);
+    // console.log(UpdatedRowIndex);
 
-    console.log(values.UpdatedRow);
+    // console.log(values.UpdatedRow);
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId,
         },
-        UpdateExpression: `SET StyleSamples.SampleSpecs.#MeasType[${UpdatedRowIndex}] = :UpdatedRow`,
-        ConditionExpression: "#Sample = :SampleStatus",
-        ExpressionAttributeNames:{
-            "#Sample" : "StyleSamples.SampleType",
-            "#MeasType" : values.MeasType
-        },
+        UpdateExpression: `SET StyleSamples[${SampleNumber}].SampleSpecs[${UpdatedRowIndex}] = :UpdatedRow`,
         ExpressionAttributeValues: {
-            ":SampleStatus" : values.SampleStatus,
             ":UpdatedRow": values.UpdatedRow
         }
     })
