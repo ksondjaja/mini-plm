@@ -91,6 +91,7 @@ const addStyle = async (style) => {
             "StyleId": id,
             "StyleInfo": info,
             "StyleSamples": [],
+            "SampleSpecs": [],
             "StyleGrading": null,
             "StyleImages": null
         }
@@ -144,9 +145,10 @@ const addSampleById = async(values) => {
         Key: {
             "StyleId": StyleId
         },
-        UpdateExpression: "SET StyleSamples = list_append(StyleSamples, :newSample)",
+        UpdateExpression: "SET StyleSamples = list_append(StyleSamples, :newSample), StyleSpecs = :updatedStyleSpecs",
         ExpressionAttributeValues: {
-            ":newSample": values.SampleInfo
+            ":newSample": values.SampleInfo,
+            ":updatedStyleSpecs": values.UpdatedStyleSpecs
         }
     })
 
@@ -176,30 +178,6 @@ const deleteSampleById = async(values) => {
 
     return await dynamoClient.send(command);
 }
-
-// Add a row of Spec
-// const addSpecRow = async(values) => {
-
-//     const StyleId = parseInt(values.StyleId);
-//     const MeasType = values.NewRow.MeasType;
-
-//     const command = new UpdateCommand({
-//         TableName: TABLE_STYLES,
-//         Key: {
-//             "StyleId": StyleId
-//         },
-//         UpdateExpression: "SET StyleSamples.#SampleStatus.#MeasType = :NewRow",
-//         ExpressionAttributeNames:{
-//             "#SampleStatus" : values.NewRow.SampleStatus,
-//             "#MeasType" : MeasType
-//         },
-//         ExpressionAttributeValues: {
-//             ":NewRow": values.NewRow
-//         }
-//     })
-
-//     return await dynamoClient.send(command);
-// }
 
 // Update a row of Spec
 // FIX 'CONDITIONAL REQUEST FAILED' -- syntax?

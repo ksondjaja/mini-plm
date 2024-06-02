@@ -34,7 +34,12 @@ function StyleSamples( props ){
     const [sampleTab, setSampleTab] = useState('History');
 
     const [samples, setSamples] = useState([]);
+    const sampleCount = samples.length
     const [WO, setWO] = useState("SMS");
+
+    const [currentSample, setCurrentSample] = useState();
+    const [tableData, setTableData] = useState();
+    const [rowCount, setRowCount] = useState()
 
     const [postResponse, setPostResponse] = useState();
     const [postError, setPostError] = useState();
@@ -73,6 +78,33 @@ function StyleSamples( props ){
         }
     }
 
+    const fetchSpecs = async (style, token) =>{
+        try{
+          const res = await axios.get(
+              (BACKEND_URL_STYLES + `/${style.StyleId}`),
+              {
+                  headers: {
+                      Authorization: 'Bearer ' + token
+                  },
+                  params: {
+                      attributes: style
+                  }
+              }
+          )
+          console.log('Response: ' + JSON.stringify(res.data));
+
+          const specs = (res.data)["Item"]["StyleSpecs"]
+    
+          setTableData(specs);
+          //setCurrentSample(specs.length);
+          setRowCount(specs[0]["StyleSpecs"].length);
+      }catch(err){
+          console.log('Error: ' + JSON.stringify(err.message));
+      }finally{
+          setLoading(false);
+      }
+    }
+
     const submitCreateSample = async (wo) => {
         try {
             const res = await axios.post(
@@ -99,30 +131,39 @@ function StyleSamples( props ){
         }
     }
 
+    const createSampleSpec = (item) => {
+        const specRowCount = item.samples.length;
+
+        for(let i=0; i<specRowCount; i++){
+            item.push({
+                id:i+1,
+                type: WO,
+                vdr: null,
+                bo: null,
+                rev: null
+            })
+        }
+    }
+
     const handleCreateSample = () => {
+
+        fetchSpecs(Style);
+
+        const newTable = tableData.forEach(createSampleSpec)
+        console.log(newTable);
 
         const WOInfo = {
             StyleId: styleid,
             SampleInfo:[{
-                id: samples.length + 1,
+                id: sampleCount + 1,
                 SampleType: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
-                SampleSpecs: [{
-                    id: 1,
-                    code: '',
-                    pom: '',
-                    init: 0,
-                    vdr: 0,
-                    bo: 0,
-                    rev: 0,
-                }]
-            }]
+            }],
+            UpdatedStyleSpecs: newTable
         }
 
-        submitCreateSample(WOInfo);
-        //setSamples(samples => [...samples, WOInfo])
-        
+        submitCreateSample(WOInfo);        
     }
 
     useEffect(()=>{

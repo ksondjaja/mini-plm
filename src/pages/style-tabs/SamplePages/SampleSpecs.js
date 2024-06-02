@@ -25,53 +25,28 @@ import {
 
 export default function SampleSpecs ( props ){
 
-  const { token, styleid, fetchSamples, BACKEND_URL_STYLES } = props;
+  const { token, styleid, fetchSamples, fetchSpecs, BACKEND_URL_STYLES } = props;
 
   const [postResponse, setPostResponse] = useState();
   const [postError, setPostError] = useState();
   const [postLoading, setPostLoading] = useState();
 
   const [loading, setLoading] = useState(true);
-    const controller = new AbortController();
-
-  const [sampleNumber, setSampleNumber] = useState(0);
-  const [measType, setMeasType] = useState('init');
-
-  const [tableData, setTableData] = useState();
-
-  const [rowCount, setRowCount] = useState()
   //const [error, setError] = useState()
+
+  const controller = new AbortController();
+
+  const [currentSample, setCurrentSample] = useState();
+  const [tableData, setTableData] = useState();
+  const [rowCount, setRowCount] = useState()
+  
 
   const Style = {
     StyleId: styleid,
     Attributes: "StyleSamples"
 }
 
-  const fetchSpecs = async (style, token) =>{
-    try{
-      const res = await axios.get(
-          (BACKEND_URL_STYLES + `/${style.StyleId}`),
-          {
-              headers: {
-                  Authorization: 'Bearer ' + token
-              },
-              params: {
-                  attributes: style
-              }
-          }
-      )
-      console.log('Response: ' + JSON.stringify(res.data));
-
-      const specs = (res.data)["Item"]["StyleSamples"][0]["SampleSpecs"]
-
-      setTableData(specs);
-      setRowCount(specs.length);
-  }catch(err){
-      console.log('Error: ' + JSON.stringify(err.message));
-  }finally{
-      setLoading(false);
-  }
-  }
+  
 
   const submitRowUpdate = async (row) => {
     try {
@@ -104,7 +79,7 @@ export default function SampleSpecs ( props ){
 
     const updatedData = {
       StyleId: styleid,
-      SampleNumber: sampleNumber,
+      SampleNumber: currentSample,
       UpdatedRow: updatedRow
     }
 
@@ -125,16 +100,17 @@ export default function SampleSpecs ( props ){
       id: parseInt(rowCount+1),
       code: '',
       pom: '',
-      init: 0,
-      vdr: 0,
-      bo: 0,
-      rev: 0,
+    }
+
+    const sampleSpec = {
+      bo: null,
+      vdr: null,
+      rev: null
     }
 
     const updatedData = {
       StyleId: styleid,
-      MeasType: measType,
-      SampleNumber: sampleNumber,
+      SampleNumber: currentSample,
       UpdatedRow: newPOM
     }
 
@@ -184,7 +160,10 @@ export default function SampleSpecs ( props ){
       editable: true,
       width: 100,
       disableColumnMenu: true
-    },
+    }
+  ];
+
+  const sampleColumns: GridColDef[] = [
     {
       field: 'vdr',
       headerName: 'Vendor Msmt',
@@ -194,7 +173,7 @@ export default function SampleSpecs ( props ){
     },
     {
       field: 'bo',
-      headerName: 'BO Msmt',
+      headerName: 'Buyer Msmt',
       editable: true,
       width: 100,
       disableColumnMenu: true
@@ -206,30 +185,7 @@ export default function SampleSpecs ( props ){
       width: 100,
       disableColumnMenu: true
     },
-  ];
-
-  // const sampleColumns: GridColDef[] = [
-  //   {
-  //     field: 'vdr',
-  //     headerName: 'Vendor Msmt',
-  //     editable: false,
-  //   },
-  //   {
-  //     field: 'bo',
-  //     headerName: 'BO Msmt',
-  //     editable: true,
-  //   },
-  //   {
-  //     field: 'diff',
-  //     headerName: 'BO Diff. from Spec',
-  //     editable: false,
-  //   },
-  //   {
-  //     field: 'rev',
-  //     headerName: 'Revised Spec',
-  //     editable: false,
-  //   },
-  // ]
+  ]
 
   useEffect(()=>{
       fetchSpecs(Style, token);
@@ -242,12 +198,8 @@ export default function SampleSpecs ( props ){
       <Grid container spacing={1}>
 
         {!loading &&
-
           <>
-          {/* <p>{tableData.init}</p><br/>
-          <p>{tableData}</p><br/>
-          <p>{rowCount}</p> */}
-          <Grid item xs={12}>
+          <Grid item xs={6}>
               <DataGrid rows={tableData} columns={initColumns}
                 processRowUpdate={(updatedRow, originalRow)=>{
                   return saveUpdatedRow(updatedRow)
@@ -270,7 +222,24 @@ export default function SampleSpecs ( props ){
               />
           </Grid>
           <Grid item xs={6}>
-
+            <DataGrid rows={tableData} columns={sampleColumns}
+                processRowUpdate={(updatedRow, originalRow)=>{
+                  return saveUpdatedRow(updatedRow)
+                }}
+                //onProcessRowUpdateError={handleProcessRowUpdateError}
+                autoHeight={true}
+                sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
+                '.MuiDataGrid-footerContainer': { display: 'none' },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  whiteSpace: "normal",
+                  lineHeight: "normal"
+                },
+                "& .MuiDataGrid-columnHeader": {
+                  height: "unset !important"
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  maxHeight: "168px !important"}}}
+              />
           </Grid>
           <Grid item xs={12} mt={1}>
             <Button color="primary" variant="contained" onClick={handleAddPOM}>
