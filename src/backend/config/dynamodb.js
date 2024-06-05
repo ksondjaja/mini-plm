@@ -91,7 +91,7 @@ const addStyle = async (style) => {
             "StyleId": id,
             "StyleInfo": info,
             "StyleSamples": [],
-            "SampleSpecs": [],
+            "StyleSpecs": [],
             "StyleGrading": null,
             "StyleImages": null
         }
@@ -157,8 +157,6 @@ const addSampleById = async(values) => {
 
 // Update Sample Info
 
-// Update Sample Specs
-
 // Delete a sample from an existing style -- NEED TO TEST
 const deleteSampleById = async(values) => {
 
@@ -179,8 +177,8 @@ const deleteSampleById = async(values) => {
     return await dynamoClient.send(command);
 }
 
-// Update a row of Spec
-// FIX 'CONDITIONAL REQUEST FAILED' -- syntax?
+// Update Spec every time a row/cell is updated
+// Edit to fit new schema
 const updateSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);

@@ -34,18 +34,17 @@ function StyleSamples( props ){
     const [sampleTab, setSampleTab] = useState('History');
 
     const [samples, setSamples] = useState([]);
-    const sampleCount = samples.length
+    const [sampleCount, setSampleCount] = useState();
     const [WO, setWO] = useState("SMS");
 
     const [currentSample, setCurrentSample] = useState();
-    const [tableData, setTableData] = useState();
-    const [rowCount, setRowCount] = useState()
 
     const [postResponse, setPostResponse] = useState();
     const [postError, setPostError] = useState();
     const [postLoading, setPostLoading] = useState();
 
     const [loading, setLoading] = useState(true);
+    const [specLoading, setSpecLoading] = useState(true);
     const controller = new AbortController();
 
 
@@ -54,8 +53,10 @@ function StyleSamples( props ){
         Attributes: "StyleSamples"
     }
 
-    const fetchSamples = async (style, token) => {
-  
+    const fetchSamples = async (style, token, runOnLoad) => {
+        let spl;
+        let splCt;
+
         try{
             const res = await axios.get(
                 (BACKEND_URL_STYLES + `/${style.StyleId}`),
@@ -70,15 +71,26 @@ function StyleSamples( props ){
             )
             console.log('Response: ' + JSON.stringify(res.data));
 
-            setSamples((res.data)["Item"]["StyleSamples"])
+            spl = (res.data)["Item"]["StyleSamples"]
+            splCt = (res.data)["Item"]["StyleSamples"].length
+
+            if(runOnLoad){
+                setSamples(spl);
+                setSampleCount(splCt)
+            }
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
             setLoading(false);
+            if(!runOnLoad){
+                return ([spl, splCt]);
+            }
         }
     }
 
-    const fetchSpecs = async (style, token) =>{
+    const fetchSpecs = async (style, token, nested) =>{
+        let specs;
+    
         try{
           const res = await axios.get(
               (BACKEND_URL_STYLES + `/${style.StyleId}`),
@@ -92,18 +104,17 @@ function StyleSamples( props ){
               }
           )
           console.log('Response: ' + JSON.stringify(res.data));
-
-          const specs = (res.data)["Item"]["StyleSpecs"]
     
-          setTableData(specs);
-          //setCurrentSample(specs.length);
-          setRowCount(specs[0]["StyleSpecs"].length);
-      }catch(err){
-          console.log('Error: ' + JSON.stringify(err.message));
-      }finally{
-          setLoading(false);
+          specs = (res.data)["Item"]["StyleSpecs"]
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }finally{ 
+          if(!nested){
+            setSpecLoading(false)
+          };
+          return (specs);
+        }
       }
-    }
 
     const submitCreateSample = async (wo) => {
         try {
@@ -131,26 +142,30 @@ function StyleSamples( props ){
         }
     }
 
-    const createSampleSpec = (item) => {
-        const specRowCount = item.samples.length;
+    const handleCreateSample = async(WO, token) => {
 
-        for(let i=0; i<specRowCount; i++){
-            item.push({
-                id:i+1,
+        // Get currently existing specs inside tableData state
+        const tableData = await fetchSpecs({
+                        StyleId: styleid,
+                        Attributes: "StyleSpecs"
+                    }, token, false);
+
+        // // Inside tableData (all specs), go to each row of spec/POM
+        
+        let specRowCount = tableData.length;
+        console.log(specRowCount)
+
+        for (let r=0; r<specRowCount; r++){
+            tableData[r].sample.push({
+                id: sampleCount+1,
                 type: WO,
                 vdr: null,
                 bo: null,
                 rev: null
             })
         }
-    }
 
-    const handleCreateSample = () => {
-
-        fetchSpecs(Style);
-
-        const newTable = tableData.forEach(createSampleSpec)
-        console.log(newTable);
+        console.log(tableData);
 
         const WOInfo = {
             StyleId: styleid,
@@ -160,14 +175,14 @@ function StyleSamples( props ){
                 DateCreated: Date.now(),
                 SampleReceived: null,
             }],
-            UpdatedStyleSpecs: newTable
+            UpdatedStyleSpecs: tableData
         }
 
-        submitCreateSample(WOInfo);        
+        submitCreateSample(WOInfo);    
     }
 
     useEffect(()=>{
-        fetchSamples(Style, token);
+        fetchSamples(Style, token, true);
         return() => controller.abort();
     }, [token]);
 
@@ -182,6 +197,8 @@ function StyleSamples( props ){
             />
 
             {sampleTab==='History' && !loading &&
+
+                // <p>{JSON.stringify(samples)}</p>
                 <Grid container spacing={2}>
                     {(samples.length>0)&&
                     samples.map((s,i)=>(
@@ -200,6 +217,7 @@ function StyleSamples( props ){
                             handleCreateSample = {handleCreateSample}
                             WO = {WO}
                             setWO = {setWO}
+                            token = {token}
                             {...props}
                         />
                     </Grid>
@@ -211,6 +229,9 @@ function StyleSamples( props ){
                     token = {token}
                     styleid = {styleid}
                     fetchSamples = {fetchSamples}
+                    fetchSpecs = {fetchSpecs}
+                    samples = {samples}
+                    sampleCount = {sampleCount}
                     BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
                     {...props}
                 />

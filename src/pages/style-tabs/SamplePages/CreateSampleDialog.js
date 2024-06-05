@@ -21,7 +21,7 @@ import {
 
 function CreateSampleDialog( props ){
 
-    const { WO, setWO, handleCreateSample } = props
+    const { token, WO, setWO, handleCreateSample } = props
 
     const [showDialog, setShowDialog] = useState(false);
     
@@ -104,7 +104,7 @@ function CreateSampleDialog( props ){
                             </Button>
                             :
                             <Button color="primary" variant="contained" onClick={()=>{
-                                handleCreateSample(WO);
+                                handleCreateSample(WO, token);
                                 setShowDialog(false);
                             }}>
                                 Create
@@ -143,7 +143,7 @@ function CreateSampleDialog( props ){
                             Back
                         </Button>
                         <Button color="primary" variant="contained" sx={{m:1}} onClick={()=>{
-                                handleCreateSample();
+                                handleCreateSample(WO, token);
                                 setShowDialog(false);
                             }}>
                             Create
