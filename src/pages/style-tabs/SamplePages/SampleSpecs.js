@@ -55,6 +55,13 @@ export default function SampleSpecs ( props ){
 
   const getColumns = async(data) => {
 
+    const rowCt = parseInt(data.length)
+
+    console.log('data: '+JSON.stringify(data[0]))
+    console.log('row count: ' + rowCt);
+
+    setRowCount(rowCt);
+
     const samplesData = await fetchSamples({
                           StyleId: styleid,
                           Attributes: "StyleSamples"
@@ -69,42 +76,44 @@ export default function SampleSpecs ( props ){
     setSampleCount(splCt);
 
     try{
-      let table = []
       let pomList = [];
-      let allSpecs = []
+      let allSpecs = [];
 
       if(splCt>0){
         for (let s=0; s<splCt; s++){
           allSpecs.push([])
         }
+      }
 
-        if(data.length>0){
-    
-          for (let i=0; i<data.length; i++){
-      
-            const p = {
-              id: data[i].id,
-              code: data[i].code,
-              pom: data[i].pom
-            }
-      
-            pomList.push(p);
+      if(rowCt>0){
   
-            
-      
-            for (let s=0; s<splCt; s++){
-              const sampleSpec = data[i].sample[s]
-              allSpecs[s].push(sampleSpec)
-            }
-          } 
-        }
+        for (let i=0; i<rowCt; i++){
+    
+          const p = {
+            id: data[i].id,
+            code: data[i].code,
+            pom: data[i].pom,
+            init: data[i].init
+          }
+          console.log('p:'+p);
+    
+          pomList.push(p);
 
-        table.push(allSpecs);
+          
+    
+          for (let s=0; s<splCt; s++){
+            const sampleSpec = data[i].samples[s]
+            allSpecs[s].push(sampleSpec)
+          }
+        } 
+      
       }else{
         console.log("no data")
       }
-      table.unshift(pomList);
+
+      const table = [pomList, allSpecs]
       setColumns(table);
+
     }catch(err){
       console.log(err)
     }finally{
@@ -112,7 +121,31 @@ export default function SampleSpecs ( props ){
     }
   }
 
-  const submitRowUpdate = async (row) => {
+  const submitNewRow = async (row) => {
+    try {
+        const res = await axios.post(
+            (BACKEND_URL_STYLES + '/addSpecRow'), 
+            row,
+            {
+                headers: {
+                    Authorization: 'Bearer ' + token
+                }
+            }
+        );
+        console.log(row);
+        console.log('Response: ' + JSON.stringify(res.data) );
+        setPostResponse(JSON.stringify(res.data));
+
+    } catch(err){
+        console.log('Error: ' + JSON.stringify(err.message));
+        setPostError(JSON.stringify(err.message));
+    } finally {
+        setPostLoading(false);
+        //fetchSpecs(Style, token);
+    }
+  }
+
+  const submitUpdatedRow = async (row) => {
     try {
         const res = await axios.post(
             (BACKEND_URL_STYLES + '/updateSpecRow'), 
@@ -136,6 +169,38 @@ export default function SampleSpecs ( props ){
     }
   }
 
+  const handleAddPOM = () => {
+
+    const sampleSpecs = []
+
+    for(let s=0; s<sampleCount; s++){
+      const column = {
+        SampleId: s+1,
+        Sample: samples[s].SampleType,
+        id: rowCount+1,
+        bo: null,
+        vdr: null,
+        rev: null
+      }
+      sampleSpecs.push(column)
+    }
+
+    const newRow = {
+      id: rowCount+1,
+      code: '',
+      pom: '',
+      init: null,
+      samples: sampleSpecs
+    }
+
+    const newData = {
+      StyleId: styleid,
+      NewRow: newRow
+    }
+
+    submitNewRow(newData)
+    setRowCount(rowCount+1)
+  }
 
   const saveUpdatedRow = (updatedRow) => {
 
@@ -143,46 +208,19 @@ export default function SampleSpecs ( props ){
 
     const updatedData = {
       StyleId: styleid,
-      SampleNumber: currentSample,
       UpdatedRow: updatedRow
     }
 
-    submitRowUpdate(updatedData)
+    submitUpdatedRow(updatedData)
     return(updatedRow)
   }
 
 
-  // const handleDeleteClick = (id: GridRowId) => () => {
-  //   setTableData(tableData.filter((row) => row.id !== id));
-  //   setRowCount(rowCount-1)
-  // };
+  const handleDeleteClick = (id: GridRowId) => () => {
+    //setTableData(tableData.filter((row) => row.id !== id));
+    //setRowCount(rowCount-1)
+  };
 
-  
-  const handleAddPOM = () => {
-
-    const newPOM = {
-      id: parseInt(rowCount+1),
-      code: '',
-      pom: '',
-    }
-
-    const sampleSpec = {
-      bo: null,
-      vdr: null,
-      rev: null
-    }
-
-    const updatedData = {
-      StyleId: styleid,
-      SampleNumber: currentSample,
-      UpdatedRow: newPOM
-    }
-
-    submitRowUpdate(updatedData)
-
-    setRowCount(rowCount+1)
-
-  }
 
   const initColumns: GridColDef[] = [
     {
@@ -197,7 +235,7 @@ export default function SampleSpecs ( props ){
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            //onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(id)}
             color="inherit"
           />
         )
@@ -228,6 +266,12 @@ export default function SampleSpecs ( props ){
   ];
 
   const sampleColumns: GridColDef[] = [
+    {
+      field: 'SampleId'
+    },
+    {
+      field: 'Sample'
+    },
     {
       field: 'vdr',
       headerName: 'Vendor Msmt',
@@ -260,7 +304,8 @@ export default function SampleSpecs ( props ){
   ]
 
   useEffect(()=>{
-      getColumns(fetchSpecs(Style, token, true))
+      fetchSpecs(Style, token, true)
+      .then(response => getColumns(response))
       return() => {controller.abort()};
   }, [token]);
 
@@ -271,10 +316,12 @@ export default function SampleSpecs ( props ){
 
         {!specLoading &&
           <>
-          <p>{JSON.stringify(samples)}</p>
-          <p>{sampleCount}</p>
-          <p>{JSON.stringify(columns)}</p>
-          {/* <Grid item xs={6}>
+          {/* <p>Samples: {JSON.stringify(samples)}</p><br/>
+          <p>Sample Count: {sampleCount}</p><br/>
+          <p>Row Count: {rowCount}</p><br/>
+          <p>Columns: {JSON.stringify(columns)}</p> */}
+
+          <Grid item xs={6} key={1}>
             <DataGrid rows={columns[0]} columns={initColumns}
               processRowUpdate={(updatedRow, originalRow)=>{
                 return saveUpdatedRow(updatedRow)
@@ -297,35 +344,47 @@ export default function SampleSpecs ( props ){
             />
           </Grid>
 
-          Map the column below --> for each sample, create a new column
+          {/* Map the column below --> for each sample, create a new column 
+          Fix Key so that each column & row is unique*/}
 
           {sampleCount>0 &&
-            <Grid item xs={6}>
-              <DataGrid rows={columns[1]} columns={sampleColumns}
-                processRowUpdate={(updatedRow, originalRow)=>{
-                  return saveUpdatedRow(updatedRow)
-                }}
-                //onProcessRowUpdateError={handleProcessRowUpdateError}
-                autoHeight={true}
-                sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
-                '.MuiDataGrid-footerContainer': { display: 'none' },
-                "& .MuiDataGrid-columnHeaderTitle": {
-                  whiteSpace: "normal",
-                  lineHeight: "normal"
-                },
-                "& .MuiDataGrid-columnHeader": {
-                  height: "unset !important"
-                },
-                "& .MuiDataGrid-columnHeaders": {
-                  maxHeight: "168px !important"}}}
-              />
-            </Grid>
+            columns[1].map((s, i)=>(
+              <Grid item xs={6} key={i+1}>
+                <DataGrid rows={s} columns={sampleColumns}
+                  initialState={{
+                    columns: {
+                      columnVisibilityModel: {
+                        // Hide columns status and traderName, the other columns will remain visible
+                        SampleId: false,
+                        Sample: false,
+                      },
+                    },
+                  }}
+                  processRowUpdate={(updatedRow, originalRow)=>{
+                    return saveUpdatedRow(updatedRow)
+                  }}
+                  //onProcessRowUpdateError={handleProcessRowUpdateError}
+                  autoHeight={true}
+                  sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
+                  '.MuiDataGrid-footerContainer': { display: 'none' },
+                  "& .MuiDataGrid-columnHeaderTitle": {
+                    whiteSpace: "normal",
+                    lineHeight: "normal"
+                  },
+                  "& .MuiDataGrid-columnHeader": {
+                    height: "unset !important"
+                  },
+                  "& .MuiDataGrid-columnHeaders": {
+                    maxHeight: "168px !important"}}}
+                />
+              </Grid>
+            ))
           }
-          <Grid item xs={12} mt={1}>
-            <Button color="primary" variant="contained" onClick={handleAddPOM}>
-              Add POM
-            </Button>
-          </Grid> */}
+            <Grid item xs={12} mt={1}>
+              <Button color="primary" variant="contained" onClick={handleAddPOM}>
+                Add POM
+              </Button>
+            </Grid>
           </>
         }
       </Grid>

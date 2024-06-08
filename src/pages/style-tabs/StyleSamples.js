@@ -136,9 +136,9 @@ function StyleSamples( props ){
             console.log('Error: ' + JSON.stringify(err.message));
             setPostError(JSON.stringify(err.message));
         } finally {
-            setPostLoading(false);
-            setWO('null');
             fetchSamples(Style, token);
+            setWO('null');
+            setPostLoading(false);
         }
     }
 
@@ -153,12 +153,14 @@ function StyleSamples( props ){
         // // Inside tableData (all specs), go to each row of spec/POM
         
         let specRowCount = tableData.length;
-        console.log(specRowCount)
+        console.log('specRowCount:'+specRowCount)
+        console.log('tableData:'+tableData)
 
         for (let r=0; r<specRowCount; r++){
-            tableData[r].sample.push({
-                id: sampleCount+1,
-                type: WO,
+            tableData[r].samples.push({
+                id: r+1,
+                SampleId: sampleCount+1,
+                Sample: WO,
                 vdr: null,
                 bo: null,
                 rev: null

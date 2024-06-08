@@ -10,7 +10,7 @@ const {
     deleteStyleById,
     addSampleById,
     deleteSampleById,
-    //addSpecRow,
+    addSpecRow,
     updateSpecRow
 } = require('../config/dynamodb');
 
@@ -150,6 +150,22 @@ router.post('/addSample', async (req, res) => {
 //     }
 // })
 
+// Add a row of Style's spec
+router.post('/addSpecRow', async (req, res) => {
+
+    const row = req.body;
+    console.log(row);
+
+    try {
+        const newRow = await addSpecRow(row);        
+        res.json(newRow);
+
+        console.log(newRow);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
 
 // Update a row of Style's spec
 router.post('/updateSpecRow', async (req, res) => {

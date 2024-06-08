@@ -177,30 +177,68 @@ const deleteSampleById = async(values) => {
     return await dynamoClient.send(command);
 }
 
-// Update Spec every time a row/cell is updated
-// Edit to fit new schema
-const updateSpecRow = async(values) => {
+const addSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
     // console.log(StyleId);
+    // console.log(values.NewRow)
 
-    const SampleNumber = parseInt(values.SampleNumber)-1;
-    // console.log(SampleNumber);
-
-    const UpdatedRowIndex = parseInt(values.UpdatedRow.id)-1;
-    // console.log(UpdatedRowIndex);
-
-    // console.log(values.UpdatedRow);
+    const NewRowIndex = parseInt(values.NewRow.id)-1;
+    // console.log(NewRowIndex);
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId,
         },
-        UpdateExpression: `SET StyleSamples[${SampleNumber}].SampleSpecs[${UpdatedRowIndex}] = :UpdatedRow`,
+        UpdateExpression: `SET StyleSpecs[${NewRowIndex}] = :NewRow`,
         ExpressionAttributeValues: {
+            ":NewRow": values.NewRow
+        }
+    })
+
+    return await dynamoClient.send(command);
+}
+
+// Update Spec every time a row/cell is updated
+// Edit to fit new schema
+const updateSpecRow = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+    // console.log(StyleId);
+    // console.log(values.UpdatedRow)
+    const UpdatedRowIndex = parseInt(values.UpdatedRow.id)-1;
+    console.log(UpdatedRowIndex);
+
+    let expression;
+    let attributeValues;
+
+    if(values.UpdatedRow.pom){
+        expression = `SET StyleSpecs[${UpdatedRowIndex}].pom = :UpdatedPOM, 
+                    StyleSpecs[${UpdatedRowIndex}].code = :UpdatedCode, 
+                    StyleSpecs[${UpdatedRowIndex}].init = :UpdatedInit`
+
+        attributeValues = {
+            ":UpdatedPOM": values.UpdatedRow.pom,
+            ":UpdatedCode": values.UpdatedRow.code,
+            ":UpdatedInit": values.UpdatedRow.init
+        }
+    }else{
+        const SampleId = parseInt(values.UpdatedRow.SampleId)-1
+
+        expression = `SET StyleSpecs[${UpdatedRowIndex}].samples[${SampleId}] = :UpdatedRow`
+        attributeValues = {
             ":UpdatedRow": values.UpdatedRow
         }
+    }
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId,
+        },
+        UpdateExpression: expression,
+        ExpressionAttributeValues: attributeValues
     })
 
     return await dynamoClient.send(command);
@@ -216,6 +254,6 @@ module.exports = {
     deleteStyleById,
     addSampleById,
     deleteSampleById,
-    //addSpecRow,
+    addSpecRow,
     updateSpecRow
 };
