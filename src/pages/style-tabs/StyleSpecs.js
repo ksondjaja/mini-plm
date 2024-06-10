@@ -23,7 +23,7 @@ import {
 } from '@mui/x-data-grid';
 
 
-export default function SampleSpecs ( props ){
+export default function StyleSpecs ( props ){
 
   const { token, styleid, fetchSamples, fetchSpecs, BACKEND_URL_STYLES } = props;
 
@@ -141,7 +141,7 @@ export default function SampleSpecs ( props ){
         setPostError(JSON.stringify(err.message));
     } finally {
         setPostLoading(false);
-        //fetchSpecs(Style, token);
+        fetchSpecs(Style, token, true).then(response => getColumns(response))
     }
   }
 
@@ -215,6 +215,17 @@ export default function SampleSpecs ( props ){
     return(updatedRow)
   }
 
+  // const handleChangeVisibility = (i) => {
+  //   const visibility = showCol[i]
+  //   console.log(visibility)
+  //   let visibilities = showCol
+
+  //   visibilities[i] = !visibility
+  //   console.log(JSON.stringify(visibilities))
+
+  //   setShowCol(visibilities)
+  // }
+
 
   const handleDeleteClick = (id: GridRowId) => () => {
     //setTableData(tableData.filter((row) => row.id !== id));
@@ -247,20 +258,20 @@ export default function SampleSpecs ( props ){
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      width: 120,
+      minWidth: 20,
       columnMenuAlign: 'left'
     },
     { 
       field: 'pom',
       headerName: 'Point of Measure',
-      width: 275,
+      minWidth: 275,
       editable: true
     },
     {
       field: 'init',
       headerName: 'Initial Specs',
       editable: true,
-      width: 100,
+      minWidth: 20,
       disableColumnMenu: true
     }
   ];
@@ -276,31 +287,23 @@ export default function SampleSpecs ( props ){
       field: 'vdr',
       headerName: 'Vendor Msmt',
       editable: true,
-      width: 100,
+      minWidth: 20,
       disableColumnMenu: true
     },
     {
       field: 'bo',
       headerName: 'Buyer Msmt',
       editable: true,
-      width: 100,
+      minWidth: 20,
       disableColumnMenu: true
     },
     {
       field: 'rev',
       headerName: 'Revised Specs',
       editable: true,
-      width: 100,
+      minWidth: 20,
       disableColumnMenu: true
     },
-  ]
-
-  const initRows = [
-
-  ]
-
-  const sampleRows = [
-
   ]
 
   useEffect(()=>{
@@ -310,83 +313,91 @@ export default function SampleSpecs ( props ){
   }, [token]);
 
   return(
-    
-      <Grid container spacing={1}>
-
-
+      <>
         {!specLoading &&
           <>
-          {/* <p>Samples: {JSON.stringify(samples)}</p><br/>
-          <p>Sample Count: {sampleCount}</p><br/>
-          <p>Row Count: {rowCount}</p><br/>
-          <p>Columns: {JSON.stringify(columns)}</p> */}
+          <Box display="inline-flex">
+            <Box key={1} display="flex" flexDirection="column" mr={1}>
+              <Typography variant="body1" color="black" sx={{ fontWeight: "bold" }}>
+                &nbsp;
+              </Typography>
+              
+              <DataGrid rows={columns[0]} columns={initColumns}
+                processRowUpdate={(updatedRow, originalRow)=>{
+                  return saveUpdatedRow(updatedRow)
+                }}
+                //onProcessRowUpdateError={handleProcessRowUpdateError}
+                autoHeight={true}
+                sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0', fontSize: '13px' },
+                '.MuiDataGrid-footerContainer': { display: 'none' },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  whiteSpace: "normal",
+                  lineHeight: "normal"
+                },
+                "& .MuiDataGrid-columnHeader": {
+                  // Forced to use important since overriding inline styles
+                  height: "unset !important"
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  // Forced to use important since overriding inline styles
+                  maxHeight: "168px !important",
+                  fontSize: '13px',
+                }}}
+              />
+            </Box>
 
-          <Grid item xs={6} key={1}>
-            <DataGrid rows={columns[0]} columns={initColumns}
-              processRowUpdate={(updatedRow, originalRow)=>{
-                return saveUpdatedRow(updatedRow)
-              }}
-              //onProcessRowUpdateError={handleProcessRowUpdateError}
-              autoHeight={true}
-              sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
-              '.MuiDataGrid-footerContainer': { display: 'none' },
-              "& .MuiDataGrid-columnHeaderTitle": {
-                whiteSpace: "normal",
-                lineHeight: "normal"
-              },
-              "& .MuiDataGrid-columnHeader": {
-                // Forced to use important since overriding inline styles
-                height: "unset !important"
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                // Forced to use important since overriding inline styles
-                maxHeight: "168px !important"}}}
-            />
-          </Grid>
+            {/* Map the column below --> for each sample, create a new column 
+            Fix Key so that each column & row is unique*/}
 
-          {/* Map the column below --> for each sample, create a new column 
-          Fix Key so that each column & row is unique*/}
-
-          {sampleCount>0 &&
-            columns[1].map((s, i)=>(
-              <Grid item xs={6} key={i+1}>
-                <DataGrid rows={s} columns={sampleColumns}
-                  initialState={{
-                    columns: {
-                      columnVisibilityModel: {
-                        // Hide columns status and traderName, the other columns will remain visible
-                        SampleId: false,
-                        Sample: false,
+            {sampleCount>0 &&
+              columns[1].map((s, i)=>(
+                <Box key={i+1} display="flex" flexDirection="column" mr={1}>
+                  <Box display="flex" justifyContent="center">
+                    <Typography variant="body1" color="black" sx={{ fontWeight: "bold" }}>
+                      {s[0].Sample}
+                    </Typography>
+                  </Box>
+                  
+                  <DataGrid rows={s} columns={sampleColumns}
+                    initialState={{
+                      columns: {
+                        columnVisibilityModel: {
+                          // Hide columns status and traderName, the other columns will remain visible
+                          SampleId: false,
+                          Sample: false,
+                        },
                       },
+                    }}
+                    processRowUpdate={(updatedRow, originalRow)=>{
+                      return saveUpdatedRow(updatedRow)
+                    }}
+                    //onProcessRowUpdateError={handleProcessRowUpdateError}
+                    autoHeight={true}
+                    sx={{ '.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0', fontSize: '13px' },
+                    '.MuiDataGrid-footerContainer': { display: 'none' },
+                    "& .MuiDataGrid-columnHeaderTitle": {
+                      whiteSpace: "normal",
+                      lineHeight: "normal"
                     },
-                  }}
-                  processRowUpdate={(updatedRow, originalRow)=>{
-                    return saveUpdatedRow(updatedRow)
-                  }}
-                  //onProcessRowUpdateError={handleProcessRowUpdateError}
-                  autoHeight={true}
-                  sx={{'.MuiDataGrid-cell': { borderRight: '1px solid #d0d0d0' },
-                  '.MuiDataGrid-footerContainer': { display: 'none' },
-                  "& .MuiDataGrid-columnHeaderTitle": {
-                    whiteSpace: "normal",
-                    lineHeight: "normal"
-                  },
-                  "& .MuiDataGrid-columnHeader": {
-                    height: "unset !important"
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    maxHeight: "168px !important"}}}
-                />
-              </Grid>
-            ))
-          }
-            <Grid item xs={12} mt={1}>
+                    "& .MuiDataGrid-columnHeader": {
+                      height: "unset !important"
+                    },
+                    "& .MuiDataGrid-columnHeaders": {
+                      maxHeight: "168px !important",
+                      fontSize: '13px',
+                    }}}
+                  />
+                </Box>
+              ))
+            }
+          </Box>
+          <Box item xs={12} mt={1}>
               <Button color="primary" variant="contained" onClick={handleAddPOM}>
                 Add POM
               </Button>
-            </Grid>
+          </Box>
           </>
         }
-      </Grid>
+      </>
   )
 }

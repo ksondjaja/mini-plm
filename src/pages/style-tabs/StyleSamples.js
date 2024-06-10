@@ -1,12 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import { useEffect } from 'react';
 import moment from 'moment';
-import CreateSampleDialog from "./SamplePages/CreateSampleDialog.js";
-import SampleSpecs from "./SamplePages/SampleSpecs";
-import { 
-    StyleMenu
-} from "core";
+import CreateSampleDialog from "./CreateSampleDialog.js";
 import {
     Grid,
     TextField,
@@ -27,119 +21,26 @@ import {
 
 function StyleSamples( props ){
 
-    const { BACKEND_URL_STYLES, styleid, token } = props;
-
-    const sampleLinks = ['History', 'Specs', 'Grading'];
-
-    const [sampleTab, setSampleTab] = useState('History');
-
-    const [samples, setSamples] = useState([]);
-    const [sampleCount, setSampleCount] = useState();
-    const [WO, setWO] = useState("SMS");
-
-    const [currentSample, setCurrentSample] = useState();
-
-    const [postResponse, setPostResponse] = useState();
-    const [postError, setPostError] = useState();
-    const [postLoading, setPostLoading] = useState();
-
-    const [loading, setLoading] = useState(true);
-    const [specLoading, setSpecLoading] = useState(true);
     const controller = new AbortController();
+
+    const { BACKEND_URL_STYLES,
+        styleid,
+        token,
+        fetchSpecs,
+        fetchSamples,
+        submitCreateSample,
+        samples,
+        setSamples,
+        sampleCount,
+        setSampleCount,
+        WO,
+        setWO
+      } = props;
 
 
     const Style = {
         StyleId: styleid,
         Attributes: "StyleSamples"
-    }
-
-    const fetchSamples = async (style, token, runOnLoad) => {
-        let spl;
-        let splCt;
-
-        try{
-            const res = await axios.get(
-                (BACKEND_URL_STYLES + `/${style.StyleId}`),
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token
-                    },
-                    params: {
-                        attributes: style
-                    }
-                }
-            )
-            console.log('Response: ' + JSON.stringify(res.data));
-
-            spl = (res.data)["Item"]["StyleSamples"]
-            splCt = (res.data)["Item"]["StyleSamples"].length
-
-            if(runOnLoad){
-                setSamples(spl);
-                setSampleCount(splCt)
-            }
-        }catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-        }finally{
-            setLoading(false);
-            if(!runOnLoad){
-                return ([spl, splCt]);
-            }
-        }
-    }
-
-    const fetchSpecs = async (style, token, nested) =>{
-        let specs;
-    
-        try{
-          const res = await axios.get(
-              (BACKEND_URL_STYLES + `/${style.StyleId}`),
-              {
-                  headers: {
-                      Authorization: 'Bearer ' + token
-                  },
-                  params: {
-                      attributes: style
-                  }
-              }
-          )
-          console.log('Response: ' + JSON.stringify(res.data));
-    
-          specs = (res.data)["Item"]["StyleSpecs"]
-        }catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-        }finally{ 
-          if(!nested){
-            setSpecLoading(false)
-          };
-          return (specs);
-        }
-      }
-
-    const submitCreateSample = async (wo) => {
-        try {
-            const res = await axios.post(
-                (BACKEND_URL_STYLES + '/addSample'), 
-                wo,
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token
-                    }
-                }
-            );
-            
-            console.log(wo);
-            console.log('Response: ' + JSON.stringify(res.data) );
-            setPostResponse(JSON.stringify(res.data));
-
-        } catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-            setPostError(JSON.stringify(err.message));
-        } finally {
-            fetchSamples(Style, token);
-            setWO('null');
-            setPostLoading(false);
-        }
     }
 
     const handleCreateSample = async(WO, token) => {
@@ -190,55 +91,63 @@ function StyleSamples( props ){
 
     return(
         <>
-            <StyleMenu
-                alignment = 'flex-start'
-                styleLinks = {sampleLinks}
-                tab = {sampleTab}
-                setTab = {setSampleTab}
-                {...props}
-            />
-
-            {sampleTab==='History' && !loading &&
-
-                // <p>{JSON.stringify(samples)}</p>
-                <Grid container spacing={2}>
-                    {(samples.length>0)&&
-                    samples.map((s,i)=>(
-                        <Grid item xs={2} key={i}>
-                            <Typography variant="body1" color="black">
-                            {s.SampleType}
-                            <br/>
-                            Spec Created: {moment(s.DateCreated).format('MMMM DD YYYY')}
-                            <br/>
-                            Sample Received: {s.SampleReceieved ? moment(s.SampleReceived).format('MMMM DD YYYY'): 'not yet'}
+            <Grid container spacing={2} display="flex" alignItems="center">
+                {(samples.length>0)&&
+                samples.map((s,i)=>(
+                        <Grid item xs={12} md={(12/(samples.length+1))} key={i}
+                            display="flex" flexDirection="column" alignItems="center" textAlign="center"
+                        >
+                            <Typography variant="h6" color="black" sx={{ fontWeight: 'bold' }}>
+                                {s.SampleType}
                             </Typography>
-                        </Grid>
-                    ))}
-                    <Grid item xs={2}>
-                        <CreateSampleDialog
-                            handleCreateSample = {handleCreateSample}
-                            WO = {WO}
-                            setWO = {setWO}
-                            token = {token}
-                            {...props}
-                        />
-                    </Grid>
-                </Grid>
-            }
+                            <Typography variant="body1" color="black">
+                                <p>
+                                    Spec Created:<br/>
+                                    <b>{moment(s.DateCreated).format('MMMM DD YYYY')}</b>
+                                </p>
+                                <p>
+                                    Sample Requested:
+                                </p>
+                                <p>
+                                    Sample Shipped:
+                                </p>
+                                <p>
+                                    Sample Received:<br/>
+                                    <b>{s.SampleReceieved ? moment(s.SampleReceived).format('MMMM DD YYYY'): 'not yet'}</b>
+                                </p>
+                                <p>
+                                    Fit Comment Sent:
+                                </p>
+                            </Typography>
 
-            { sampleTab==='Specs' &&
-                <SampleSpecs
-                    token = {token}
-                    styleid = {styleid}
-                    fetchSamples = {fetchSamples}
-                    fetchSpecs = {fetchSpecs}
-                    samples = {samples}
-                    sampleCount = {sampleCount}
-                    BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
-                    {...props}
-                />
-            }
-            
+                            {/*
+                                Create a Markdown file to write fit comment 
+                                Update status when sent/made visible to vendor & change button to "See Comment"
+                                Allow to update sample status (enter dates if available)
+                            */}
+
+                            <Button variant="contained" color="secondary" sx={{ my: 2 }}>
+                                Write Comment
+                            </Button>
+
+                            <Button variant="outlined" color="primary" width="auto">
+                                Update Info
+                            </Button>
+
+                        </Grid>
+                ))}
+                <Grid item xs={12} md={12/(samples.length+1)} display="flex" justifyContent="center">
+                    <CreateSampleDialog
+                        handleCreateSample = {handleCreateSample}
+                        WO = {WO}
+                        setWO = {setWO}
+                        token = {token}
+                        {...props}
+                    />
+                </Grid>
+            </Grid>
+
+                
         </>
     )
 }

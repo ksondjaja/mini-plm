@@ -197,7 +197,7 @@ function App (props) {
             />
 
             <Route
-              path="/stylepage/:id"
+              path="/stylepage/:id/*"
               element={
                 state.loggedIn ?
                   <StylePage

@@ -1,3 +1,4 @@
+import { Link, useLocation, useMatch } from "react-router-dom";
 import { styled as styledMUI } from "@mui/system";
 import {
     AppBar,
@@ -7,7 +8,6 @@ import {
     Grid,
     IconButton,
     Typography,
-    Link,
     Menu,
     MenuItem,
     Fade,
@@ -16,6 +16,8 @@ import {
 
 
 export const StyleMenu = (props) => {
+
+    const location = useLocation();
 
     const MUIAppBar = styledMUI(AppBar)({
         padding: props.mode==="stylePage" ? "1%": "none"
@@ -30,19 +32,24 @@ export const StyleMenu = (props) => {
         >
             <Toolbar sx={{ display: "flex", flexDirection: "column" }}>
                 <Box item sx={{ display: "flex", alignItems: "center", justifyContent: props.alignment, width: "100%", mb: 1}}>
-                    {(props.styleLinks).map((l, i) => (
+                    {(props.styleLinks).map((l) => (
                         <Link
-                            key={i}
-                            variant="body1"
-                            color="primary"
-                            underline="none"
-                            sx={{  mr: 4,
-                                fontWeight: ((l===props.tab)? "bold" : "normal"),
-                                '&:hover': { textDecoration: "underline", cursor: "pointer" }
-                            }}
-                            onClick={()=>props.setTab(l)}
+                            key={l.id}
+                            to = {"."+l.url}
+                            style = {{ textDecoration: "none" }}
+                            onClick = {()=>props.setTab(l.name)}
                         >
-                            {l}
+                            <Typography
+                                variant="body1"
+                                color="primary"
+                                underline="none"
+                                sx={{  mr: 4,
+                                    fontWeight: ((l.name===props.tab)? "bold" : "normal"),
+                                    '&:hover': { textDecoration: "underline", cursor: "pointer" }
+                                }}
+                            >
+                                {l.name}
+                            </Typography>
                         </Link>
                     ))}
                 </Box>
