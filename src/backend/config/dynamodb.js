@@ -81,6 +81,8 @@ const addStyle = async (style) => {
 
     const id = parseInt(style.StyleId);
     const info = style.StyleInfo;
+    const samples = style.Samples;
+    const specs = style.Specs;
 
     console.log(id);
     console.log(info);
@@ -90,8 +92,8 @@ const addStyle = async (style) => {
         Item: {
             "StyleId": id,
             "StyleInfo": info,
-            "StyleSamples": [],
-            "StyleSpecs": [],
+            "StyleSamples": samples,
+            "StyleSpecs": specs,
             "StyleGrading": null,
             "StyleImages": null
         }
@@ -177,6 +179,7 @@ const deleteSampleById = async(values) => {
     return await dynamoClient.send(command);
 }
 
+// Add new row of Spec for all samples
 const addSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
@@ -201,7 +204,6 @@ const addSpecRow = async(values) => {
 }
 
 // Update Spec every time a row/cell is updated
-// Edit to fit new schema
 const updateSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
@@ -245,6 +247,29 @@ const updateSpecRow = async(values) => {
 }
 
 
+// Delete a row of Spec for all samples
+const deleteSpecRow = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+    // console.log(StyleId);
+
+    const RowIndex = parseInt(values.RowId)-1;
+    // console.log(NewRowIndex);
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId,
+        },
+        UpdateExpression: `REMOVE StyleSpecs[${RowIndex}]`,
+        ReturnValues: 'ALL_NEW'
+    })
+
+    return await dynamoClient.send(command);
+}
+
+
+
 module.exports = {
     dynamoClient,
     getStylesPreview,
@@ -255,5 +280,6 @@ module.exports = {
     addSampleById,
     deleteSampleById,
     addSpecRow,
-    updateSpecRow
+    updateSpecRow,
+    deleteSpecRow
 };

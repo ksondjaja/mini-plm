@@ -106,7 +106,9 @@ function CreateStyle( props ) {
 
         const styleData = {
             StyleId: dateNow,
-            StyleInfo: newStyle
+            StyleInfo: newStyle,
+            StyleSamples: [],
+            StyleSpecs: []
         }
 
         submitStyleData(styleData);

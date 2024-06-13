@@ -39,7 +39,6 @@ export default function StyleSpecs ( props ){
 
   const [samples, setSamples] = useState([]);
   const [sampleCount, setSampleCount] = useState();
-  const [currentSample, setCurrentSample] = useState();
 
   const [rowCount, setRowCount] = useState();
   
@@ -169,6 +168,29 @@ export default function StyleSpecs ( props ){
     }
   }
 
+  const submitDeleteRow = async (row) => {
+    try {
+        const res = await axios.post(
+            (BACKEND_URL_STYLES + '/deleteSpecRow'), 
+            row,
+            {
+                headers: {
+                    Authorization: 'Bearer ' + token
+                }
+            }
+        );
+        console.log(row);
+        console.log('Response: ' + JSON.stringify(res.data) );
+        setPostResponse(JSON.stringify(res.data));
+    } catch(err){
+        console.log('Error: ' + JSON.stringify(err.message));
+        setPostError(JSON.stringify(err.message));
+    } finally {
+        setPostLoading(false);
+        fetchSpecs(Style, token, true).then(response => getColumns(response))
+    }
+  }
+
   const handleAddPOM = () => {
 
     const sampleSpecs = []
@@ -228,8 +250,16 @@ export default function StyleSpecs ( props ){
 
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    //setTableData(tableData.filter((row) => row.id !== id));
-    //setRowCount(rowCount-1)
+
+    const rowInfo = {
+      StyleId: styleid,
+      RowId: id
+    }
+
+    submitDeleteRow(rowInfo);
+    setRowCount(rowCount-1);
+
+    //how to assign other rows new ids? Because right now id = order in array
   };
 
 
