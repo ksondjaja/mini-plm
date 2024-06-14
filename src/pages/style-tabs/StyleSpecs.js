@@ -42,8 +42,6 @@ export default function StyleSpecs ( props ){
 
   const [rowCount, setRowCount] = useState();
   
-  let tableData = [];
-  
   const [columns, setColumns] = useState();
   
 
@@ -61,51 +59,49 @@ export default function StyleSpecs ( props ){
 
     setRowCount(rowCt);
 
+    // Get sample names, number of samples
     const samplesData = await fetchSamples({
                           StyleId: styleid,
                           Attributes: "StyleSamples"
                         }, token, false)
-
+    
     const spl = samplesData[0]
     const splCt = samplesData[1]
-
-    console.log(spl, splCt)
 
     setSamples(spl);
     setSampleCount(splCt);
 
     try{
-      let pomList = [];
       let allSpecs = [];
+      let pomList = []
 
+      // Set number of sample columns for DataGrid
       if(splCt>0){
         for (let s=0; s<splCt; s++){
           allSpecs.push([])
         }
-      }
-
-      if(rowCt>0){
-  
-        for (let i=0; i<rowCt; i++){
-    
-          const p = {
-            id: data[i].id,
-            code: data[i].code,
-            pom: data[i].pom,
-            init: data[i].init
-          }
-          console.log('p:'+p);
-    
-          pomList.push(p);
-
-          
-    
-          for (let s=0; s<splCt; s++){
-            const sampleSpec = data[i].samples[s]
-            allSpecs[s].push(sampleSpec)
-          }
-        } 
       
+    
+        // For each row of POM, POM info & initial specs
+        for (const [key, value] of data){
+          
+          const p = {
+            id: value.id,
+            POMId: key,
+            code: value.code,
+            pom: value.pom,
+            init: value.init
+          }
+          
+          pomList.append(p);
+            
+          // For each row of POM, get measurements for each sample, put in corresponding column in allSpecs array
+          let s = 0
+          for (const [k,v] of value.sample){
+            allSpecs[s].push(v)
+            s++;
+          }
+        }
       }else{
         console.log("no data")
       }
@@ -193,22 +189,32 @@ export default function StyleSpecs ( props ){
 
   const handleAddPOM = () => {
 
-    const sampleSpecs = []
+    // Each new POM row needs to have a row for each sample
 
-    for(let s=0; s<sampleCount; s++){
+    const sampleSpecs = {}
+    const timeStamp = Date.now()
+
+    // Create new POM row for each sample
+    for (const [splKey, value] in samples){
+
       const column = {
-        SampleId: s+1,
-        Sample: samples[s].SampleType,
-        id: rowCount+1,
+        order: rowCount+1, //row order number
+        POMId: `POM${timeStamp}`,  //actual unique row Id
+        SampleId: value.id,
+        Sample: splKey,
         bo: null,
         vdr: null,
         rev: null
       }
-      sampleSpecs.push(column)
+
+      sampleSpecs.splKey = column
     }
 
+    // Submit new POM row
+
     const newRow = {
-      id: rowCount+1,
+      order: rowCount+1, //row order number
+      POMId: `POM${timeStamp}`,  //actual unique row Id
       code: '',
       pom: '',
       init: null,
@@ -237,6 +243,14 @@ export default function StyleSpecs ( props ){
     return(updatedRow)
   }
 
+
+
+  // **Bcs row reorder is not available in free version of MUI's React DataGrid component**
+  // Create function to automatically sort rows based on order number upon row change
+  // All row order num should be integers with 1 increment, no duplicate
+  // Update order number for all columns, then update entire table in backend (re-submit entire StyleSpecs)
+
+
   // const handleChangeVisibility = (i) => {
   //   const visibility = showCol[i]
   //   console.log(visibility)
@@ -249,19 +263,25 @@ export default function StyleSpecs ( props ){
   // }
 
 
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDeleteClick = (params: GridRowProps) => () => {
 
     const rowInfo = {
       StyleId: styleid,
-      RowId: id
+      RowId: params.POMId
     }
 
     submitDeleteRow(rowInfo);
     setRowCount(rowCount-1);
 
-    //how to assign other rows new ids? Because right now id = order in array
+    //assign new id for all rows
   };
 
+
+  // Need to limit data types/value for each column
+  // https://mui.com/x/react-data-grid/column-definition/#column-types
+  // https://mui.com/x/react-data-grid/recipes-editing/#conditional-validation
+  // How to limit row order num to integer
+  // and measurements to fraction?
 
   const initColumns: GridColDef[] = [
     {
@@ -271,16 +291,26 @@ export default function StyleSpecs ( props ){
       align: 'left',
       width: 20,
       disableColumnMenu: true,
-      renderCell: ({ id }) => {
+      renderCell: ({ params }) => {
         return(
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(params)}
             color="inherit"
           />
         )
       }
+    },
+    {
+      field: 'order',
+      headerName: 'No.',
+      type: 'number',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      minWidth: 20,
+      columnMenuAlign: 'left'
     },
     {
       field: 'code',
@@ -294,12 +324,14 @@ export default function StyleSpecs ( props ){
     { 
       field: 'pom',
       headerName: 'Point of Measure',
+      type: 'string',
       minWidth: 275,
       editable: true
     },
     {
       field: 'init',
       headerName: 'Initial Specs',
+      type: 'number',
       editable: true,
       minWidth: 20,
       disableColumnMenu: true
@@ -314,8 +346,13 @@ export default function StyleSpecs ( props ){
       field: 'Sample'
     },
     {
+      field: 'order',
+      type: 'number'
+    },
+    {
       field: 'vdr',
       headerName: 'Vendor Msmt',
+      type: 'number',
       editable: true,
       minWidth: 20,
       disableColumnMenu: true
@@ -323,6 +360,7 @@ export default function StyleSpecs ( props ){
     {
       field: 'bo',
       headerName: 'Buyer Msmt',
+      type: 'number',
       editable: true,
       minWidth: 20,
       disableColumnMenu: true
@@ -330,6 +368,7 @@ export default function StyleSpecs ( props ){
     {
       field: 'rev',
       headerName: 'Revised Specs',
+      type: 'number',
       editable: true,
       minWidth: 20,
       disableColumnMenu: true
@@ -353,6 +392,7 @@ export default function StyleSpecs ( props ){
               </Typography>
               
               <DataGrid rows={columns[0]} columns={initColumns}
+                getRowId={(row) => row.POMId}
                 processRowUpdate={(updatedRow, originalRow)=>{
                   return saveUpdatedRow(updatedRow)
                 }}
@@ -389,12 +429,14 @@ export default function StyleSpecs ( props ){
                   </Box>
                   
                   <DataGrid rows={s} columns={sampleColumns}
+                    getRowId={(row) => row.POMId}
                     initialState={{
                       columns: {
                         columnVisibilityModel: {
                           // Hide columns status and traderName, the other columns will remain visible
                           SampleId: false,
                           Sample: false,
+                          order: false
                         },
                       },
                     }}

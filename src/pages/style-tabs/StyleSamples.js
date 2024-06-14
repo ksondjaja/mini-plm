@@ -53,31 +53,35 @@ function StyleSamples( props ){
 
         // // Inside tableData (all specs), go to each row of spec/POM
         
-        let specRowCount = tableData.length;
-        console.log('specRowCount:'+specRowCount)
+        //let specRowCount = tableData.length;
+        console.log('POM row count:'+tableData.length)
         console.log('tableData:'+tableData)
 
-        for (let r=0; r<specRowCount; r++){
-            tableData[r].samples.push({
-                id: r+1,
-                SampleId: sampleCount+1,
+        // For each POM row add a new sample msmt
+        let r = 1
+        for (const [key, value] of tableData){
+            tableData.samples[WO] = {
+                order: r,
+                POMId: key,
+                SampleId: sampleCount +1,
                 Sample: WO,
                 vdr: null,
                 bo: null,
                 rev: null
-            })
+            }
+            r++;
         }
 
         console.log(tableData);
 
         const WOInfo = {
             StyleId: styleid,
-            SampleInfo:[{
+            SampleInfo:{
                 id: sampleCount + 1,
                 SampleType: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
-            }],
+            },
             UpdatedStyleSpecs: tableData
         }
 

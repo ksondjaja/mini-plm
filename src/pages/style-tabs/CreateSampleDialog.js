@@ -25,6 +25,7 @@ function CreateSampleDialog( props ){
 
     const [showDialog, setShowDialog] = useState(false);
     
+    // Change to put a number next to each sample type, auto increment from last sample
 
     const handleOpenDialog = event => {
         setShowDialog(true);

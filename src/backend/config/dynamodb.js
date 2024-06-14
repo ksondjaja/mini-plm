@@ -186,15 +186,15 @@ const addSpecRow = async(values) => {
     // console.log(StyleId);
     // console.log(values.NewRow)
 
-    const NewRowIndex = parseInt(values.NewRow.id)-1;
-    // console.log(NewRowIndex);
-
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId,
         },
-        UpdateExpression: `SET StyleSpecs[${NewRowIndex}] = :NewRow`,
+        UpdateExpression: `SET StyleSpecs.#RowId = :NewRow`,
+        ExpressionAttributeNames: {
+            "#RowId" : values.NewRow.POMId
+        },
         ExpressionAttributeValues: {
             ":NewRow": values.NewRow
         }
@@ -209,16 +209,19 @@ const updateSpecRow = async(values) => {
     const StyleId = parseInt(values.StyleId);
     // console.log(StyleId);
     // console.log(values.UpdatedRow)
-    const UpdatedRowIndex = parseInt(values.UpdatedRow.id)-1;
-    console.log(UpdatedRowIndex);
 
     let expression;
+    let attributeNames;
     let attributeValues;
 
     if(values.UpdatedRow.pom){
-        expression = `SET StyleSpecs[${UpdatedRowIndex}].pom = :UpdatedPOM, 
-                    StyleSpecs[${UpdatedRowIndex}].code = :UpdatedCode, 
-                    StyleSpecs[${UpdatedRowIndex}].init = :UpdatedInit`
+        expression = `SET StyleSpecs.#RowKey.pom = :UpdatedPOM, 
+                    StyleSpecs.#RowKey.code = :UpdatedCode, 
+                    StyleSpecs.#RowKey.init = :UpdatedInit`
+
+        attributeNames = {
+            "#RowKey" : values.UpdatedRow.POMId
+        }
 
         attributeValues = {
             ":UpdatedPOM": values.UpdatedRow.pom,
@@ -226,9 +229,13 @@ const updateSpecRow = async(values) => {
             ":UpdatedInit": values.UpdatedRow.init
         }
     }else{
-        const SampleId = parseInt(values.UpdatedRow.SampleId)-1
+        expression = `SET StyleSpecs.#RowKey.#SampleKey = :UpdatedRow`
 
-        expression = `SET StyleSpecs[${UpdatedRowIndex}].samples[${SampleId}] = :UpdatedRow`
+        attributeNames = {
+            "#RowKey" : values.UpdatedRow.POMId,
+            "#SampleKey": values.UpdatedRow.Sample
+        }
+
         attributeValues = {
             ":UpdatedRow": values.UpdatedRow
         }
@@ -240,6 +247,7 @@ const updateSpecRow = async(values) => {
             "StyleId": StyleId,
         },
         UpdateExpression: expression,
+        ExpressionAttributeNames: attributeNames,
         ExpressionAttributeValues: attributeValues
     })
 
@@ -253,17 +261,19 @@ const deleteSpecRow = async(values) => {
     const StyleId = parseInt(values.StyleId);
     // console.log(StyleId);
 
-    const RowIndex = parseInt(values.RowId)-1;
-    // console.log(NewRowIndex);
-
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId,
         },
-        UpdateExpression: `REMOVE StyleSpecs[${RowIndex}]`,
+        UpdateExpression: `REMOVE StyleSpecs.#RowKey`,
+        ExpressionAttributeNames: {
+            "#RowKey": values.RowKey
+        },
         ReturnValues: 'ALL_NEW'
     })
+
+    // How to assign new id for all rows
 
     return await dynamoClient.send(command);
 }
