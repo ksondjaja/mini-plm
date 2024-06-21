@@ -32,6 +32,7 @@ function StyleSamples( props ){
         fetchSamples,
         submitCreateSample,
         samples,
+        setSamples,
         getSamples,
         sampleCount,
         WO,
@@ -50,11 +51,11 @@ function StyleSamples( props ){
         // // Inside tableData (all specs), go to each row of spec/POM
         
         //let specRowCount = tableData.length;
-        console.log('POM row count:'+Object.keys(tableData).length)
+        //console.log('POM row count:'+Object.keys(tableData).length)
         console.log('tableData:'+tableData)
 
         // For each POM row add a new sample msmt
-        if (samples.length>0){
+        if (samples){
             let r = 1
 
             for (const [key, value] of Object.entries(tableData)){
@@ -94,7 +95,7 @@ function StyleSamples( props ){
             StyleId: styleid,
             Attributes: "StyleSamples"
           }, token, true)
-        .then(response => StyleSamples(Array.from(Object.values(response)).reverse()))
+        .then(response => setSamples(Array.from(Object.values(response)).reverse()))
         return() => controller.abort();
     }, [token]);
 
@@ -103,7 +104,9 @@ function StyleSamples( props ){
             <Grid container spacing={2} display="flex" alignItems="center">
                 {(samples.length>0) &&
                 samples.map((s,i)=>(
-                        <Grid item xs={12} md={(12/(samples.length+1))} key={i}
+                        <Grid item xs={12}
+                            md={(12/(samples.length+1))}
+                            key={i}
                             display="flex" flexDirection="column" alignItems="center" textAlign="center"
                         >
                             <Typography variant="h6" color="black" sx={{ fontWeight: 'bold' }}>
@@ -145,7 +148,9 @@ function StyleSamples( props ){
 
                         </Grid>
                 ))}
-                <Grid item xs={12} md={12/(samples.length+1)} display="flex" justifyContent="center">
+                <Grid item xs={12}
+                    md={12/(samples.length+1)}
+                    display="flex" justifyContent="center">
                     <CreateSampleDialog
                         handleCreateSample = {handleCreateSample}
                         WO = {WO}

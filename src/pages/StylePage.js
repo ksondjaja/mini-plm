@@ -255,7 +255,8 @@ function StylePage( props ) {
                                 fetchSamples={fetchSamples}
                                 fetchSpecs = {fetchSpecs}
                                 submitCreateSample = {submitCreateSample}
-                                getSamples = {getSamples}
+                                samples = {samples}
+                                setSamples = {setSamples}
                                 sampleCount = {sampleCount}
                                 WO = {WO}
                                 setWO = {setWO}
@@ -273,6 +274,7 @@ function StylePage( props ) {
                             fetchSamples = {fetchSamples}
                             fetchSpecs = {fetchSpecs}
                             getSamples = {getSamples}
+                            setSamples = {setSamples}
                             samples = {samples}
                             sampleCount = {sampleCount}
                             BACKEND_URL_STYLES = {BACKEND_URL_STYLES}

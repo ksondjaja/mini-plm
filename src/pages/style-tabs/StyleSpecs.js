@@ -25,7 +25,7 @@ import {
 
 export default function StyleSpecs ( props ){
 
-  const { token, styleid, fetchSamples, fetchSpecs, getSamples, samples, BACKEND_URL_STYLES } = props;
+  const { token, styleid, fetchSamples, fetchSpecs, samples, setSamples, sampleCount, BACKEND_URL_STYLES } = props;
 
   const [postResponse, setPostResponse] = useState();
   const [postError, setPostError] = useState();
@@ -45,6 +45,7 @@ export default function StyleSpecs ( props ){
   const [columns, setColumns] = useState();
 
 
+  // Fix when specLoading is set to false. Right now sample columns don't finish loading when the page loads.
   const getColumns = async(specs) => {
 
     try{
@@ -57,24 +58,23 @@ export default function StyleSpecs ( props ){
       setRowCount(rowCt);
 
       // Get sample names, number of samples
-      const samplesData = await fetchSamples({
-                            StyleId: styleid,
-                            Attributes: "StyleSamples"
-                          }, token)
+      // const samplesData = await fetchSamples({
+      //                       StyleId: styleid,
+      //                       Attributes: "StyleSamples"
+      //                     }, token).then(response => Array.from(Object.values(response)).reverse())
 
-      console.log("data: " + JSON.stringify(samplesData))
+      // setSamples(samplesData)
 
-      const spl = Array.from(Object.values(samplesData)).reverse()
-      const splCt = spl.length;
+      const splCt = sampleCount;
 
-      console.log("getting columns: "+ JSON.stringify(spl.length))
+      console.log("getting columns: "+ sampleCount)
 
       let allSpecs = [];
       let pomList = []
 
-      if(samplesData){
+      if(samples){
 
-        console.log(JSON.stringify(samplesData))
+        console.log(JSON.stringify(samples))
 
         // const spl = samplesData
         // const splCt = Object.keys(samplesData).length;
@@ -106,10 +106,10 @@ export default function StyleSpecs ( props ){
           //let s = 0
 
           for(let s=0; s<splCt; s++){
-            const splName = spl[0]
+            const splName = Object.keys(samples)[s]
             const spec = value.samples[splName]
 
-            allSpecs(s).push(spec)  
+            allSpecs.push(spec)  
           }
           
           // for (const [k,v] of Object.entries(value.samples)){
@@ -124,6 +124,8 @@ export default function StyleSpecs ( props ){
 
     const table = [pomList, allSpecs]
     setColumns(table);
+
+    console.log(table)
 
     }catch(err){
       console.log(err)
@@ -400,11 +402,15 @@ export default function StyleSpecs ( props ){
   ]
 
   useEffect(()=>{
-    fetchSpecs({
+    fetchSamples({
+      StyleId: styleid,
+      Attributes: "StyleSamples"
+    }, token).then(response => setSamples(Array.from(Object.values(response)).reverse()))
+    .then(fetchSpecs({
         StyleId: styleid,
         Attributes: "StyleSpecs"
       }, token, true)
-      .then(response => getColumns(response))
+      .then(response => getColumns(response)))
       return() => {controller.abort()};
   }, [token]);
 
@@ -452,13 +458,18 @@ export default function StyleSpecs ( props ){
 
             {/* Map the column below --> for each sample, create a new column 
             Fix Key so that each column & row is unique*/}
-
+            {/* {samples.length>0 &&
+            <>
+              {JSON.stringify(samples[0].SampleName)}
+              {JSON.stringify(columns[1])}
+            </>
+            } */}
             {samples.length>0 &&
               columns[1].map((s, i)=>(
                 <Box key={i+1} display="flex" flexDirection="column" mr={1}>
                   <Box display="flex" justifyContent="center">
                     <Typography variant="body1" color="black" sx={{ fontWeight: "bold" }}>
-                      {s[0].Sample}
+                      {samples[i].SampleName}
                     </Typography>
                   </Box>
                   
