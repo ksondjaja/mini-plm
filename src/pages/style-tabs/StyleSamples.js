@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import moment from 'moment';
 import CreateSampleDialog from "./CreateSampleDialog.js";
 import {
@@ -23,6 +23,8 @@ function StyleSamples( props ){
 
     const controller = new AbortController();
 
+    const [page, setPage] = useState(0);
+
     const { BACKEND_URL_STYLES,
         styleid,
         token,
@@ -30,19 +32,13 @@ function StyleSamples( props ){
         fetchSamples,
         submitCreateSample,
         samples,
-        setSamples,
+        getSamples,
         sampleCount,
-        setSampleCount,
         WO,
         setWO
       } = props;
 
-
-    const Style = {
-        StyleId: styleid,
-        Attributes: "StyleSamples"
-    }
-
+    
     const handleCreateSample = async(WO, token) => {
 
         // Get currently existing specs inside tableData state
@@ -54,31 +50,36 @@ function StyleSamples( props ){
         // // Inside tableData (all specs), go to each row of spec/POM
         
         //let specRowCount = tableData.length;
-        console.log('POM row count:'+tableData.length)
+        console.log('POM row count:'+Object.keys(tableData).length)
         console.log('tableData:'+tableData)
 
         // For each POM row add a new sample msmt
-        let r = 1
-        for (const [key, value] of tableData){
-            tableData.samples[WO] = {
-                order: r,
-                POMId: key,
-                SampleId: sampleCount +1,
-                Sample: WO,
-                vdr: null,
-                bo: null,
-                rev: null
+        if (samples.length>0){
+            let r = 1
+
+            for (const [key, value] of Object.entries(tableData)){
+                tableData.samples.WO = {
+                    order: r,
+                    POMId: key,
+                    SampleId: sampleCount +1,
+                    Sample: WO,
+                    vdr: null,
+                    bo: null,
+                    rev: null
+                }
+                r++;
             }
-            r++;
-        }
+        }        
 
         console.log(tableData);
+
+        const timestamp = Date.now()
 
         const WOInfo = {
             StyleId: styleid,
             SampleInfo:{
-                id: sampleCount + 1,
-                SampleType: WO,
+                id: `SPL${timestamp}`,
+                SampleName: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
             },
@@ -89,20 +90,24 @@ function StyleSamples( props ){
     }
 
     useEffect(()=>{
-        fetchSamples(Style, token, true);
+        fetchSamples({
+            StyleId: styleid,
+            Attributes: "StyleSamples"
+          }, token, true)
+        .then(response => StyleSamples(Array.from(Object.values(response)).reverse()))
         return() => controller.abort();
     }, [token]);
 
     return(
         <>
             <Grid container spacing={2} display="flex" alignItems="center">
-                {(samples.length>0)&&
+                {(samples.length>0) &&
                 samples.map((s,i)=>(
                         <Grid item xs={12} md={(12/(samples.length+1))} key={i}
                             display="flex" flexDirection="column" alignItems="center" textAlign="center"
                         >
                             <Typography variant="h6" color="black" sx={{ fontWeight: 'bold' }}>
-                                {s.SampleType}
+                                {s.SampleName}
                             </Typography>
                             <Typography variant="body1" color="black">
                                 <p>
@@ -146,6 +151,8 @@ function StyleSamples( props ){
                         WO = {WO}
                         setWO = {setWO}
                         token = {token}
+                        page = {page}
+                        setPage = {setPage}
                         {...props}
                     />
                 </Grid>

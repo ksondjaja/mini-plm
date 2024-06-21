@@ -81,8 +81,8 @@ const addStyle = async (style) => {
 
     const id = parseInt(style.StyleId);
     const info = style.StyleInfo;
-    const samples = style.Samples;
-    const specs = style.Specs;
+    const samples = style.StyleSamples;
+    const specs = style.StyleSpecs;
 
     console.log(id);
     console.log(info);
@@ -141,16 +141,20 @@ const deleteStyleById = async (styleid) => {
 const addSampleById = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
+    const SampleName = values.SampleInfo.SampleName;
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
         Key: {
             "StyleId": StyleId
         },
-        UpdateExpression: "SET StyleSamples = list_append(StyleSamples, :newSample), StyleSpecs = :updatedStyleSpecs",
+        UpdateExpression: "SET StyleSamples.#SampleName = :newSample, StyleSpecs = :newSpecs",
+        ExpressionAttributeNames: {
+            "#SampleName": SampleName
+        },
         ExpressionAttributeValues: {
             ":newSample": values.SampleInfo,
-            ":updatedStyleSpecs": values.UpdatedStyleSpecs
+            ":newSpecs": values.UpdatedStyleSpecs
         }
     })
 
@@ -266,11 +270,10 @@ const deleteSpecRow = async(values) => {
         Key: {
             "StyleId": StyleId,
         },
-        UpdateExpression: `REMOVE StyleSpecs.#RowKey`,
+        UpdateExpression: `REMOVE StyleSpecs.#RowId`,
         ExpressionAttributeNames: {
-            "#RowKey": values.RowKey
-        },
-        ReturnValues: 'ALL_NEW'
+            "#RowId": values.RowId
+        }
     })
 
     // How to assign new id for all rows

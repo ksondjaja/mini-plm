@@ -25,7 +25,7 @@ import {
 
 export default function StyleSpecs ( props ){
 
-  const { token, styleid, fetchSamples, fetchSpecs, BACKEND_URL_STYLES } = props;
+  const { token, styleid, fetchSamples, fetchSpecs, getSamples, samples, BACKEND_URL_STYLES } = props;
 
   const [postResponse, setPostResponse] = useState();
   const [postError, setPostError] = useState();
@@ -37,77 +37,93 @@ export default function StyleSpecs ( props ){
 
   const controller = new AbortController();
 
-  const [samples, setSamples] = useState([]);
-  const [sampleCount, setSampleCount] = useState();
+  // const [samples, setSamples] = useState([]);
+  // const [sampleCount, setSampleCount] = useState();
 
   const [rowCount, setRowCount] = useState();
   
   const [columns, setColumns] = useState();
-  
 
-  const Style = {
-    StyleId: styleid,
-    Attributes: "StyleSpecs"
-  }
 
-  const getColumns = async(data) => {
-
-    const rowCt = parseInt(data.length)
-
-    console.log('data: '+JSON.stringify(data[0]))
-    console.log('row count: ' + rowCt);
-
-    setRowCount(rowCt);
-
-    // Get sample names, number of samples
-    const samplesData = await fetchSamples({
-                          StyleId: styleid,
-                          Attributes: "StyleSamples"
-                        }, token, false)
-    
-    const spl = samplesData[0]
-    const splCt = samplesData[1]
-
-    setSamples(spl);
-    setSampleCount(splCt);
+  const getColumns = async(specs) => {
 
     try{
+
+      const rowCt = Object.keys(specs).length
+
+      console.log('data: '+JSON.stringify(specs))
+      console.log('row count: ' + rowCt);
+
+      setRowCount(rowCt);
+
+      // Get sample names, number of samples
+      const samplesData = await fetchSamples({
+                            StyleId: styleid,
+                            Attributes: "StyleSamples"
+                          }, token)
+
+      console.log("data: " + JSON.stringify(samplesData))
+
+      const spl = Array.from(Object.values(samplesData)).reverse()
+      const splCt = spl.length;
+
+      console.log("getting columns: "+ JSON.stringify(spl.length))
+
       let allSpecs = [];
       let pomList = []
 
-      // Set number of sample columns for DataGrid
-      if(splCt>0){
-        for (let s=0; s<splCt; s++){
-          allSpecs.push([])
+      if(samplesData){
+
+        console.log(JSON.stringify(samplesData))
+
+        // const spl = samplesData
+        // const splCt = Object.keys(samplesData).length;
+
+        // setSamples(spl);
+        // setSampleCount(splCt);
+
+        // Set number of sample columns for DataGrid
+        if(splCt>0){
+          for (let s=0; s<splCt; s++){
+            allSpecs.push([])
+          }
         }
       
-    
         // For each row of POM, POM info & initial specs
-        for (const [key, value] of data){
-          
+        for (const [key, value] of Object.entries(specs)){
+
           const p = {
-            id: value.id,
-            POMId: key,
+            order: value.order, //row order number
+            POMId: key,  //actual unique row Id
             code: value.code,
             pom: value.pom,
             init: value.init
           }
           
-          pomList.append(p);
+          pomList.push(p);
             
           // For each row of POM, get measurements for each sample, put in corresponding column in allSpecs array
-          let s = 0
-          for (const [k,v] of value.sample){
-            allSpecs[s].push(v)
-            s++;
+          //let s = 0
+
+          for(let s=0; s<splCt; s++){
+            const splName = spl[0]
+            const spec = value.samples[splName]
+
+            allSpecs(s).push(spec)  
           }
+          
+          // for (const [k,v] of Object.entries(value.samples)){
+          //   allSpecs[s].push(v)
+          //   s++;
+          // }
         }
+
       }else{
-        console.log("no data")
+        console.log("no samples data")
       }
 
-      const table = [pomList, allSpecs]
-      setColumns(table);
+    const table = [pomList, allSpecs]
+    setColumns(table);
 
     }catch(err){
       console.log(err)
@@ -136,7 +152,10 @@ export default function StyleSpecs ( props ){
         setPostError(JSON.stringify(err.message));
     } finally {
         setPostLoading(false);
-        fetchSpecs(Style, token, true).then(response => getColumns(response))
+        fetchSpecs({
+          StyleId: styleid,
+          Attributes: "StyleSpecs"
+        }, token, true).then(response => getColumns(response))
     }
   }
 
@@ -176,14 +195,18 @@ export default function StyleSpecs ( props ){
             }
         );
         console.log(row);
-        console.log('Response: ' + JSON.stringify(res.data) );
+        console.log('Delete Response: ' + JSON.stringify(res.data) );
         setPostResponse(JSON.stringify(res.data));
     } catch(err){
         console.log('Error: ' + JSON.stringify(err.message));
         setPostError(JSON.stringify(err.message));
     } finally {
         setPostLoading(false);
-        fetchSpecs(Style, token, true).then(response => getColumns(response))
+        
+        fetchSpecs({
+          StyleId: styleid,
+          Attributes: "StyleSpecs"
+        }, token, true).then(response => getColumns(response))
     }
   }
 
@@ -249,6 +272,7 @@ export default function StyleSpecs ( props ){
   // Create function to automatically sort rows based on order number upon row change
   // All row order num should be integers with 1 increment, no duplicate
   // Update order number for all columns, then update entire table in backend (re-submit entire StyleSpecs)
+  // https://github.com/mui/mui-x/issues/2289
 
 
   // const handleChangeVisibility = (i) => {
@@ -263,11 +287,11 @@ export default function StyleSpecs ( props ){
   // }
 
 
-  const handleDeleteClick = (params: GridRowProps) => () => {
+  const handleDeleteClick = (id: GridRowId) => () => {
 
     const rowInfo = {
       StyleId: styleid,
-      RowId: params.POMId
+      RowId: id
     }
 
     submitDeleteRow(rowInfo);
@@ -291,12 +315,12 @@ export default function StyleSpecs ( props ){
       align: 'left',
       width: 20,
       disableColumnMenu: true,
-      renderCell: ({ params }) => {
+      renderCell: ({ id }) => {
         return(
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            onClick={handleDeleteClick(params)}
+            onClick={handleDeleteClick(id)}
             color="inherit"
           />
         )
@@ -376,14 +400,17 @@ export default function StyleSpecs ( props ){
   ]
 
   useEffect(()=>{
-      fetchSpecs(Style, token, true)
+    fetchSpecs({
+        StyleId: styleid,
+        Attributes: "StyleSpecs"
+      }, token, true)
       .then(response => getColumns(response))
       return() => {controller.abort()};
   }, [token]);
 
   return(
       <>
-        {!specLoading &&
+        {!specLoading && (columns.length>0) &&
           <>
           <Box display="inline-flex">
             <Box key={1} display="flex" flexDirection="column" mr={1}>
@@ -393,6 +420,13 @@ export default function StyleSpecs ( props ){
               
               <DataGrid rows={columns[0]} columns={initColumns}
                 getRowId={(row) => row.POMId}
+                initialState={{
+                  columns: {
+                    columnVisibilityModel: {
+                      order: false
+                    },
+                  },
+                }}
                 processRowUpdate={(updatedRow, originalRow)=>{
                   return saveUpdatedRow(updatedRow)
                 }}
@@ -419,7 +453,7 @@ export default function StyleSpecs ( props ){
             {/* Map the column below --> for each sample, create a new column 
             Fix Key so that each column & row is unique*/}
 
-            {sampleCount>0 &&
+            {samples.length>0 &&
               columns[1].map((s, i)=>(
                 <Box key={i+1} display="flex" flexDirection="column" mr={1}>
                   <Box display="flex" justifyContent="center">
@@ -433,7 +467,6 @@ export default function StyleSpecs ( props ){
                     initialState={{
                       columns: {
                         columnVisibilityModel: {
-                          // Hide columns status and traderName, the other columns will remain visible
                           SampleId: false,
                           Sample: false,
                           order: false

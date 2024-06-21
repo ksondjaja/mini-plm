@@ -35,11 +35,6 @@ function StylePage( props ) {
     const controller = new AbortController();
     const styleUrl = location.pathname;
 
-    const Style = {
-        StyleId: params["id"],
-        Attributes: "StyleInfo, StyleImages"
-    }
-
     const styleid = params["id"];
 
     const styleLinks = [
@@ -84,6 +79,16 @@ function StylePage( props ) {
             url: "/costs"
         },
     ]
+
+    const getSamples = async(spl) => {
+
+        var samplesList = Array.from(Object.values(spl))
+
+        samplesList = samplesList.reverse()
+
+        setSamples(samplesList);
+    }
+
 
     const fetchStyle = async (style, token) => {
   
@@ -130,19 +135,17 @@ function StylePage( props ) {
             console.log('Response: ' + JSON.stringify(res.data));
 
             spl = (res.data)["Item"]["StyleSamples"]
-            splCt = (res.data)["Item"]["StyleSamples"].length
+            console.log(spl)
+            
+            splCt = Object.keys((res.data)["Item"]["StyleSamples"]).length
+            console.log(splCt)
+            setSampleCount(splCt)
 
-            if(runOnLoad){
-                setSamples(spl);
-                setSampleCount(splCt)
-            }
+            return(spl)
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
             setLoading(false);
-            if(!runOnLoad){
-                return ([spl, splCt]);
-            }
         }
     }
 
@@ -194,8 +197,11 @@ function StylePage( props ) {
             console.log('Error: ' + JSON.stringify(err.message));
             setPostError(JSON.stringify(err.message));
         } finally {
-            fetchSamples(Style, token, true);
-            setWO('null');
+            fetchSamples({
+                StyleId: styleid,
+                Attributes: "StyleSamples"
+            }, token, true);
+            setWO(null);
             setPostLoading(false);
             navigate(0);
         }
@@ -203,7 +209,10 @@ function StylePage( props ) {
     
 
     useEffect(()=>{
-        fetchStyle(Style, token);
+        fetchStyle({
+            StyleId: params["id"],
+            Attributes: "StyleInfo, StyleImages"
+        }, token);
         console.log(styleUrl);
         return() => controller.abort();
     }, [token]);
@@ -246,7 +255,7 @@ function StylePage( props ) {
                                 fetchSamples={fetchSamples}
                                 fetchSpecs = {fetchSpecs}
                                 submitCreateSample = {submitCreateSample}
-                                samples = {samples}
+                                getSamples = {getSamples}
                                 sampleCount = {sampleCount}
                                 WO = {WO}
                                 setWO = {setWO}
@@ -263,6 +272,7 @@ function StylePage( props ) {
                             styleid = {styleid}
                             fetchSamples = {fetchSamples}
                             fetchSpecs = {fetchSpecs}
+                            getSamples = {getSamples}
                             samples = {samples}
                             sampleCount = {sampleCount}
                             BACKEND_URL_STYLES = {BACKEND_URL_STYLES}

@@ -21,17 +21,18 @@ import {
 
 function CreateSampleDialog( props ){
 
-    const { token, WO, setWO, handleCreateSample } = props
+    const { token, WO, setWO, handleCreateSample, page, setPage } = props
 
     const [showDialog, setShowDialog] = useState(false);
     
     // Change to put a number next to each sample type, auto increment from last sample
 
     const handleOpenDialog = event => {
-        setShowDialog(true);
-        if(WO.includes("Fit")){
-            setWO("Fit");
-        }
+        //setShowDialog(true);
+        setPage(1);
+        // if(WO.includes("Fit")){
+        //     setWO("Fit");
+        // }
     }
 
     const handleRadioChange = event => {
@@ -42,17 +43,21 @@ function CreateSampleDialog( props ){
     const handleClickNext = event => {
         event.preventDefault();
 
-        setShowDialog(0);
+        setPage(2)
+        //setShowDialog(0);
 
         //Change default Fit number depending on other samples already created
         //Below is to be edited
-        setWO("Fit1");
+        setWO(`${WO}-1`);
 
     }
 
     const handleChangeFit = event => {
         const num = event.target.value;
-        setWO(`Fit${num}`);
+
+        const splitWO = WO.split('-')
+
+        setWO(`${splitWO[0]}-${num}`);
     }
 
     return(
@@ -69,8 +74,8 @@ function CreateSampleDialog( props ){
             </Button>
         </Grid>
         <Dialog
-            open={ showDialog===true }
-            onClose={()=>{ setShowDialog(false) }}
+            open={ page === 1 }
+            onClose={()=>{ setPage(0) }}
         >
             <DialogContent>
                 <Grid container spacing={2} p={2}>
@@ -99,17 +104,20 @@ function CreateSampleDialog( props ){
                         </Grid>
                         
                         <Grid item mt={3} display="flex" justifyContent="center">
-                            {WO==="Fit"?
-                            <Button color="primary" variant="contained" onClick={handleClickNext}>
-                                Next
-                            </Button>
-                            :
-                            <Button color="primary" variant="contained" onClick={()=>{
-                                handleCreateSample(WO, token);
-                                setShowDialog(false);
-                            }}>
-                                Create
-                            </Button>
+                            {page===1 &&
+                                <Button color="primary" variant="contained" onClick={handleClickNext}>
+                                    Next
+                                </Button>
+                            }
+                            
+                            {page===2 &&
+                                <Button color="primary" variant="contained" onClick={()=>{
+                                    handleCreateSample(WO, token);
+                                    setPage(0)
+                                    //setShowDialog(false);
+                                }}>
+                                    Create
+                                </Button>
                             }
                             
                         </Grid>
@@ -119,14 +127,14 @@ function CreateSampleDialog( props ){
         </Dialog>
 
         <Dialog
-            open={ showDialog===0 }
-            onClose={()=>{ setShowDialog(false) }}
+            open={ page === 2 }
+            onClose={()=>{ setPage(0) }}
         >
             <DialogContent>
                 <Grid container spacing={2} p={2} direction="column">
                     <Grid item>
                         <Typography color="primary" variant="h6">
-                            <b>Fit Number</b>
+                            <b>{WO} Sample Number</b>
                         </Typography>
                     </Grid>
                 
