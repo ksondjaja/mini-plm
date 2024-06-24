@@ -80,15 +80,6 @@ function StylePage( props ) {
         },
     ]
 
-    const getSamples = async(spl) => {
-
-        var samplesList = Array.from(Object.values(spl))
-
-        samplesList = samplesList.reverse()
-
-        setSamples(samplesList);
-    }
-
 
     const fetchStyle = async (style, token) => {
   
@@ -136,16 +127,18 @@ function StylePage( props ) {
 
             spl = (res.data)["Item"]["StyleSamples"]
             console.log(spl)
+
+            //setSamples(Array.from(Object.values(spl)).reverse())
             
-            splCt = Object.keys((res.data)["Item"]["StyleSamples"]).length
-            console.log(splCt)
-            setSampleCount(splCt)
+            //splCt = Object.keys((res.data)["Item"]["StyleSamples"]).length
+            //console.log(splCt)
+            //setSampleCount(splCt)
 
             return(spl)
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
-            setLoading(false);
+            //setLoading(false);
         }
     }
 
@@ -171,7 +164,7 @@ function StylePage( props ) {
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{ 
           if(!nested){
-            setSpecLoading(false)
+            //setSpecLoading(false)
           };
           return (specs);
         }
@@ -204,6 +197,7 @@ function StylePage( props ) {
             setWO(null);
             setPostLoading(false);
             navigate(0);
+            // how to make sure that tab highlight "Samples" instead of "Overview"?
         }
     }
     
@@ -258,6 +252,7 @@ function StylePage( props ) {
                                 samples = {samples}
                                 setSamples = {setSamples}
                                 sampleCount = {sampleCount}
+                                setSampleCount = {setSampleCount}
                                 WO = {WO}
                                 setWO = {setWO}
                                 BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
@@ -273,10 +268,10 @@ function StylePage( props ) {
                             styleid = {styleid}
                             fetchSamples = {fetchSamples}
                             fetchSpecs = {fetchSpecs}
-                            getSamples = {getSamples}
-                            setSamples = {setSamples}
                             samples = {samples}
+                            setSamples = {setSamples}
                             sampleCount = {sampleCount}
+                            setSampleCount = {setSampleCount}
                             BACKEND_URL_STYLES = {BACKEND_URL_STYLES}
                             {...props}
                         />

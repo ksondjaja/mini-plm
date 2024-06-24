@@ -25,7 +25,7 @@ import {
 
 export default function StyleSpecs ( props ){
 
-  const { token, styleid, fetchSamples, fetchSpecs, samples, setSamples, sampleCount, BACKEND_URL_STYLES } = props;
+  const { token, styleid, fetchSamples, fetchSpecs, samples, setSamples, sampleCount, setSampleCount, BACKEND_URL_STYLES } = props;
 
   const [postResponse, setPostResponse] = useState();
   const [postError, setPostError] = useState();
@@ -36,9 +36,6 @@ export default function StyleSpecs ( props ){
   //const [error, setError] = useState()
 
   const controller = new AbortController();
-
-  // const [samples, setSamples] = useState([]);
-  // const [sampleCount, setSampleCount] = useState();
 
   const [rowCount, setRowCount] = useState();
   
@@ -58,29 +55,26 @@ export default function StyleSpecs ( props ){
       setRowCount(rowCt);
 
       // Get sample names, number of samples
-      // const samplesData = await fetchSamples({
-      //                       StyleId: styleid,
-      //                       Attributes: "StyleSamples"
-      //                     }, token).then(response => Array.from(Object.values(response)).reverse())
+      const sampleData = await fetchSamples({
+        StyleId: styleid,
+        Attributes: "StyleSamples"
+      }, token)
 
-      // setSamples(samplesData)
+      const spl = Array.from(Object.values(sampleData))
+      const splCt = spl.length;
 
-      const splCt = sampleCount;
+      console.log("spl: "+spl)
+      console.log("splCt:"+splCt)
 
-      console.log("getting columns: "+ sampleCount)
+      setSamples(spl);
+      setSampleCount(splCt)
 
       let allSpecs = [];
       let pomList = []
 
-      if(samples){
+      if(spl){
 
-        console.log(JSON.stringify(samples))
-
-        // const spl = samplesData
-        // const splCt = Object.keys(samplesData).length;
-
-        // setSamples(spl);
-        // setSampleCount(splCt);
+        console.log(JSON.stringify("spl:"+JSON.stringify(spl)))
 
         // Set number of sample columns for DataGrid
         if(splCt>0){
@@ -101,21 +95,23 @@ export default function StyleSpecs ( props ){
           }
           
           pomList.push(p);
+
+          console.log(JSON.stringify("value.samples: "+JSON.stringify(value.samples)))
             
           // For each row of POM, get measurements for each sample, put in corresponding column in allSpecs array
-          //let s = 0
 
           for(let s=0; s<splCt; s++){
-            const splName = Object.keys(samples)[s]
-            const spec = value.samples[splName]
+            const splId = spl[s].id
 
-            allSpecs.push(spec)  
+            console.log("splId:" + splId)
+
+            const spec = value.samples[splId]
+
+            allSpecs[s].push(spec)  
           }
+
+          //why do sample specs become null again when refreshed?
           
-          // for (const [k,v] of Object.entries(value.samples)){
-          //   allSpecs[s].push(v)
-          //   s++;
-          // }
         }
 
       }else{
@@ -130,7 +126,8 @@ export default function StyleSpecs ( props ){
     }catch(err){
       console.log(err)
     }finally{
-      setSpecLoading(false); 
+      setLoading(false); 
+      setSpecLoading(false);
     }
   }
 
@@ -219,20 +216,26 @@ export default function StyleSpecs ( props ){
     const sampleSpecs = {}
     const timeStamp = Date.now()
 
+    console.log("samples:"+JSON.stringify(samples))
+    console.log("sampleCount"+sampleCount)
+
     // Create new POM row for each sample
-    for (const [splKey, value] in samples){
+    for (let i=0; i<sampleCount; i++){
+
+      const splId = samples[i].id;
+      console.log("splId: "+ splId)
 
       const column = {
         order: rowCount+1, //row order number
         POMId: `POM${timeStamp}`,  //actual unique row Id
-        SampleId: value.id,
-        Sample: splKey,
+        SampleId: splId,
+        Sample: samples[i].SampleName,
         bo: null,
         vdr: null,
         rev: null
       }
 
-      sampleSpecs.splKey = column
+      sampleSpecs[splId] = column
     }
 
     // Submit new POM row
@@ -405,18 +408,19 @@ export default function StyleSpecs ( props ){
     fetchSamples({
       StyleId: styleid,
       Attributes: "StyleSamples"
-    }, token).then(response => setSamples(Array.from(Object.values(response)).reverse()))
+    }, token).then(response => Array.from(Object.values(response)))
     .then(fetchSpecs({
         StyleId: styleid,
         Attributes: "StyleSpecs"
       }, token, true)
       .then(response => getColumns(response)))
+      .then(console.log("columns: "+columns))
       return() => {controller.abort()};
   }, [token]);
 
   return(
       <>
-        {!specLoading && (columns.length>0) &&
+        {!specLoading && !loading && (columns.length>0) &&
           <>
           <Box display="inline-flex">
             <Box key={1} display="flex" flexDirection="column" mr={1}>
@@ -458,12 +462,12 @@ export default function StyleSpecs ( props ){
 
             {/* Map the column below --> for each sample, create a new column 
             Fix Key so that each column & row is unique*/}
-            {/* {samples.length>0 &&
+            {samples.length>0 &&
             <>
-              {JSON.stringify(samples[0].SampleName)}
-              {JSON.stringify(columns[1])}
+              {/* {JSON.stringify(samples[0])} */}
+              {/*JSON.stringify(columns[1])*/}
             </>
-            } */}
+            }
             {samples.length>0 &&
               columns[1].map((s, i)=>(
                 <Box key={i+1} display="flex" flexDirection="column" mr={1}>

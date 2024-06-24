@@ -23,6 +23,7 @@ function StyleSamples( props ){
 
     const controller = new AbortController();
 
+    const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
 
     const { BACKEND_URL_STYLES,
@@ -33,8 +34,8 @@ function StyleSamples( props ){
         submitCreateSample,
         samples,
         setSamples,
-        getSamples,
         sampleCount,
+        setSampleCount,
         WO,
         setWO
       } = props;
@@ -50,19 +51,20 @@ function StyleSamples( props ){
 
         // // Inside tableData (all specs), go to each row of spec/POM
         
-        //let specRowCount = tableData.length;
-        //console.log('POM row count:'+Object.keys(tableData).length)
         console.log('tableData:'+tableData)
+
+        const timestamp = Date.now()
+        const splId = `SPL${timestamp}`
 
         // For each POM row add a new sample msmt
         if (samples){
             let r = 1
 
             for (const [key, value] of Object.entries(tableData)){
-                tableData.samples.WO = {
+                tableData.samples.splId = {
                     order: r,
                     POMId: key,
-                    SampleId: sampleCount +1,
+                    SampleId: splId,
                     Sample: WO,
                     vdr: null,
                     bo: null,
@@ -74,12 +76,10 @@ function StyleSamples( props ){
 
         console.log(tableData);
 
-        const timestamp = Date.now()
-
         const WOInfo = {
             StyleId: styleid,
             SampleInfo:{
-                id: `SPL${timestamp}`,
+                id: splId,
                 SampleName: WO,
                 DateCreated: Date.now(),
                 SampleReceived: null,
@@ -95,12 +95,17 @@ function StyleSamples( props ){
             StyleId: styleid,
             Attributes: "StyleSamples"
           }, token, true)
-        .then(response => setSamples(Array.from(Object.values(response)).reverse()))
+        .then(response => {
+            setSamples(Array.from(Object.values(response)));
+            setSampleCount(response.length)
+        })
+        .then(setLoading(false))
         return() => controller.abort();
     }, [token]);
 
     return(
         <>
+        {!loading &&
             <Grid container spacing={2} display="flex" alignItems="center">
                 {(samples.length>0) &&
                 samples.map((s,i)=>(
@@ -163,7 +168,7 @@ function StyleSamples( props ){
                 </Grid>
             </Grid>
 
-                
+        }   
         </>
     )
 }

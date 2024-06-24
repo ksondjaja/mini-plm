@@ -141,7 +141,7 @@ const deleteStyleById = async (styleid) => {
 const addSampleById = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
-    const SampleName = values.SampleInfo.SampleName;
+    const SampleId = values.SampleInfo.id;
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
@@ -150,7 +150,7 @@ const addSampleById = async(values) => {
         },
         UpdateExpression: "SET StyleSamples.#SampleName = :newSample, StyleSpecs = :newSpecs",
         ExpressionAttributeNames: {
-            "#SampleName": SampleName
+            "#SampleName": SampleId
         },
         ExpressionAttributeValues: {
             ":newSample": values.SampleInfo,
@@ -237,7 +237,7 @@ const updateSpecRow = async(values) => {
 
         attributeNames = {
             "#RowKey" : values.UpdatedRow.POMId,
-            "#SampleKey": values.UpdatedRow.Sample
+            "#SampleKey": values.UpdatedRow.SampleId
         }
 
         attributeValues = {
