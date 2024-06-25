@@ -26,7 +26,7 @@ function Nav(props) {
     return(
         // <Fade appear={false} easing={{ enter: "linear", exit: "linear" }}>
         //     <Box flexGrow="1">
-                <MUIAppBar elevation={10} position="fixed" sx={{ zIndex: 999 }}>
+                <MUIAppBar elevation={5} position="fixed" sx={{ zIndex: 999 }}>
                     <Toolbar>
                         <Grid container
                             display="flex"

@@ -1,17 +1,78 @@
-import React from "react";
-import { useState } from 'react';
+import React, { useState } from 'react';
+import dayjs from 'dayjs';
 import {
     Box,
     Typography,
     MenuItem,
     TextField,
     InputAdornment,
-    IconButton
+    IconButton,
  } from '@mui/material';
  import {
     Check
 } from '@mui/icons-material';
 import SelectData from '../../data/SelectData';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import {
+    LocalizationProvider,
+    DatePicker
+} from '@mui/x-date-pickers/';
+
+
+export const HasDateInput = props => {
+
+    // How to replace "enter date" item with saved date if date exists? 
+
+    const [hasDate, setHasDate] = useState(props.inputData==='none'? false: true)
+    const [inputValue, setInputValue] = useState(props.inputData==='none' ? 'none': props.inputData)
+
+    const handleAddDate = event => {
+        const value = event.target.value;
+
+        if(value==="has date"){
+            setHasDate(true)
+            setInputValue('has date')
+        }else{
+            setHasDate(false)
+            setInputValue('none')
+        }
+    }
+
+    return(
+        <Box display="flex" flexDirection="column" my={2}>
+            <TextField
+                select="true"
+                value={inputValue}
+                label={props.inputLabel}
+                name={props.input}
+                onChange={handleAddDate}
+                sx={{ width: '200px' }}
+                {...props}
+            >
+                <MenuItem value={'none'}>not yet</MenuItem>
+                <MenuItem value={'has date'}>enter date</MenuItem>
+            </TextField>
+
+            {hasDate &&
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['DatePicker']}>
+                        <DatePicker
+                            id={'date-'+ (props.input)}
+                            label={(props.inputLabel)+' Date'}
+                            name={'date-'+ (props.input)}
+                            views={['year', 'month', 'day']}
+                            value={dayjs(inputValue) ?? dayjs()}
+                            onChange={props.dateOnChange}
+                            {...props}
+                        />
+                    </DemoContainer>
+                </LocalizationProvider>
+            }
+        </Box>
+    )
+    
+}
 
 export const StyleAttribute = props => {
 

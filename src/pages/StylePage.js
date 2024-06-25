@@ -128,12 +128,6 @@ function StylePage( props ) {
             spl = (res.data)["Item"]["StyleSamples"]
             console.log(spl)
 
-            //setSamples(Array.from(Object.values(spl)).reverse())
-            
-            //splCt = Object.keys((res.data)["Item"]["StyleSamples"]).length
-            //console.log(splCt)
-            //setSampleCount(splCt)
-
             return(spl)
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
@@ -163,9 +157,9 @@ function StylePage( props ) {
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{ 
-          if(!nested){
+          //if(!nested){
             //setSpecLoading(false)
-          };
+          //};
           return (specs);
         }
       }
@@ -190,12 +184,12 @@ function StylePage( props ) {
             console.log('Error: ' + JSON.stringify(err.message));
             setPostError(JSON.stringify(err.message));
         } finally {
-            fetchSamples({
-                StyleId: styleid,
-                Attributes: "StyleSamples"
-            }, token, true);
-            setWO(null);
-            setPostLoading(false);
+            // fetchSamples({
+            //     StyleId: styleid,
+            //     Attributes: "StyleSamples"
+            // }, token, true);
+            // setWO(null);
+            // setPostLoading(false);
             navigate(0);
             // how to make sure that tab highlight "Samples" instead of "Overview"?
         }

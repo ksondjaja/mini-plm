@@ -1,30 +1,33 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
+import axios from 'axios';
 import CreateSampleDialog from "./CreateSampleDialog.js";
+import { 
+    HasDateInput
+} from "core";
 import {
     Grid,
-    TextField,
-    Select,
-    MenuItem,
-    Box,
     Typography,
     Button
 } from '@mui/material';
-
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import {
-    LocalizationProvider,
-    DatePicker
-} from '@mui/x-date-pickers/';
 
 
 function StyleSamples( props ){
 
     const controller = new AbortController();
+    const navigate = useNavigate();
+
+    const [postResponse, setPostResponse] = useState();
+    const [postError, setPostError] = useState();
+    const [postLoading, setPostLoading] = useState();
 
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
+
+    const [editMode, setEditMode] = useState(false);
+    const [splEditing, setSplEditing] = useState('')
+    const [editValues, setEditValues] = useState(null)
 
     const { BACKEND_URL_STYLES,
         styleid,
@@ -82,12 +85,66 @@ function StyleSamples( props ){
                 id: splId,
                 SampleName: WO,
                 DateCreated: Date.now(),
-                SampleReceived: null,
+                SampleRequested: 'none',
+                SampleShipped: 'none',
+                SampleReceived: 'none',
+                FitCommentSent: 'none',
+                FitComment: 'none'
             },
             UpdatedStyleSpecs: tableData
         }
 
         submitCreateSample(WOInfo);    
+    }
+
+    const handleEditSample = (splId, i) => {
+        setSplEditing(splId)
+        setEditMode(true)
+        console.log(samples[i])
+        setEditValues(samples[i])
+    }
+
+    const handleEditDatePickerChange = (value, name) => {
+        setEditValues({
+            ...editValues,
+            [name]: value
+        })
+    }
+
+    const submitUpdateSample = async (SampleId) => {
+
+        const StyleId = parseInt(styleid);
+
+        console.log(JSON.stringify(editValues));
+
+        const values = {
+            "StyleId": StyleId,
+            "SampleId": SampleId,
+            "SampleInfo": editValues
+        }
+
+        try {
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + '/updateSample'), 
+                values,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            );
+            
+            console.log(values);
+            console.log('Response: ' + JSON.stringify(res.data) );
+            setPostResponse(JSON.stringify(res.data));
+
+        } catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+            setPostError(JSON.stringify(err.message));
+        } finally {
+            navigate(0);
+            // how to make sure that tab highlight "Samples" instead of "Overview"?
+        }
     }
 
     useEffect(()=>{
@@ -109,49 +166,111 @@ function StyleSamples( props ){
             <Grid container spacing={2} display="flex" alignItems="center">
                 {(samples.length>0) &&
                 samples.map((s,i)=>(
+                    
                         <Grid item xs={12}
                             md={(12/(samples.length+1))}
                             key={i}
                             display="flex" flexDirection="column" alignItems="center" textAlign="center"
                         >
-                            <Typography variant="h6" color="black" sx={{ fontWeight: 'bold' }}>
-                                {s.SampleName}
-                            </Typography>
-                            <Typography variant="body1" color="black">
-                                <p>
-                                    Spec Created:<br/>
-                                    <b>{moment(s.DateCreated).format('MMMM DD YYYY')}</b>
-                                </p>
-                                <p>
-                                    Sample Requested:
-                                </p>
-                                <p>
-                                    Sample Shipped:
-                                </p>
-                                <p>
-                                    Sample Received:<br/>
-                                    <b>{s.SampleReceieved ? moment(s.SampleReceived).format('MMMM DD YYYY'): 'not yet'}</b>
-                                </p>
-                                <p>
-                                    Fit Comment Sent:
-                                </p>
-                            </Typography>
+                                <Typography variant="h6" color="black" sx={{ fontWeight: 'bold' }}>
+                                    {s.SampleName}
+                                </Typography>
+                                <Typography variant="body1" color="black" sx={{ mb: 3 }}>
+                                    <p>
+                                        Spec Created:<br/>
+                                        <b>{moment(s.DateCreated).format('MMMM DD, YYYY')}</b>
+                                    </p>
+                                    {(editMode && splEditing===s.id) ?
+                                        <>
+                                            <HasDateInput
+                                                inputData = {s.SampleRequested}
+                                                inputLabel = 'Sample Requested'
+                                                input = 'SampleRequested'
+                                                dateOnChange = {(newDate)=>handleEditDatePickerChange(newDate, 'SampleRequested')}
+                                                slotProps={{ textField: { variant: "standard" } }}
+                                                fullwidth
+                                            />
 
-                            {/*
-                                Create a Markdown file to write fit comment 
-                                Update status when sent/made visible to vendor & change button to "See Comment"
-                                Allow to update sample status (enter dates if available)
-                            */}
+                                            <HasDateInput
+                                                inputData = {s.SampleShipped}
+                                                inputLabel = 'Sample Shipped'
+                                                input = 'SampleShipped'
+                                                dateOnChange = {(newDate)=>handleEditDatePickerChange(newDate, 'SampleShipped')}
+                                                slotProps={{ textField: { variant: "standard" } }}
+                                                fullwidth
+                                            />
 
-                            <Button variant="contained" color="secondary" sx={{ my: 2 }}>
-                                Write Comment
-                            </Button>
+                                            <HasDateInput
+                                                inputData = {s.SampleReceived}
+                                                inputLabel = 'Sample Received'
+                                                input = 'SampleReceived'
+                                                dateOnChange = {(newDate)=>handleEditDatePickerChange(newDate, 'SampleReceived')}
+                                                slotProps={{ textField: { variant: "standard" } }}
+                                                fullwidth
+                                            />
 
-                            <Button variant="outlined" color="primary" width="auto">
-                                Update Info
-                            </Button>
+                                            <HasDateInput
+                                                inputData = {s.FitCommentSent}
+                                                inputLabel = 'Fit Comment Sent'
+                                                input = 'FitCommentSent'
+                                                dateOnChange = {(newDate)=>handleEditDatePickerChange(newDate, 'FitCommentSent')}
+                                                slotProps={{ textField: { variant: "standard" } }}
+                                                fullwidth
+                                            />
+                                        </>
+                                        :
+                                        <>
+                                        
+                                            <p>
+                                                Sample Requested:<br/>
+                                                <b>{s.SampleRequested !=='none' ? moment(s.SampleRequested.slice(0,10)).format('MMMM DD, YYYY') : 'not yet'}</b>
+                                            </p>
+                                            <p>
+                                                Sample Shipped:<br/>
+                                                <b>{s.SampleShipped !=='none' ? moment(s.SampleShipped.slice(0,10)).format('MMMM DD, YYYY') : 'not yet'}</b>
+                                            </p>
+                                            <p>
+                                                Sample Received:<br/>
+                                                <b>{s.SampleReceived !=='none' ? moment(s.SampleReceived.slice(0,10)).format('MMMM DD, YYYY') : 'not yet'}</b>
+                                            </p>
+                                            <p>
+                                                Fit Comment Sent:<br/>
+                                                <b>{s.FitCommentSent !=='none' ? moment(s.FitCommentSent.slice(0,10)).format('MMMM DD, YYYY') : 'not yet'}</b>
+                                            </p>
+                                        </>
+                                    }
+                                </Typography>
 
+                                {/*
+                                    Create a Markdown file to write fit comment 
+                                    Update status when sent/made visible to vendor & change button to "See Comment"
+                                    Allow to update sample status (enter dates if available)
+                                */}
+                                
+                                {(editMode && splEditing===s.id) ? 
+                                    <>
+                                        <Button color="primary" variant="contained" sx={{my: 1}} onClick={()=>submitUpdateSample(s.id)}>
+                                            Save Updates
+                                        </Button>  
+                                        <Button variant="outlined" color="primary" sx={{my: 1}} onClick={()=>setEditMode(false)}>
+                                            Discard Updates
+                                        </Button>
+                                        <Button color="error" variant="contained" sx={{my: 1}} onClick={()=>{}}>
+                                            Delete Sample
+                                        </Button>
+                                    </>
+                                    :
+                                    <Button variant="outlined" color="primary" width="auto" onClick={()=>handleEditSample(s.id, i)}>
+                                        Update Info
+                                    </Button>
+                                }
+
+                                <Button variant="contained" color="secondary" sx={{ my: 4 }}>
+                                    Write Comment
+                                </Button>
+                                
                         </Grid>
+                    
                 ))}
                 <Grid item xs={12}
                     md={12/(samples.length+1)}

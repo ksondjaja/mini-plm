@@ -148,9 +148,9 @@ const addSampleById = async(values) => {
         Key: {
             "StyleId": StyleId
         },
-        UpdateExpression: "SET StyleSamples.#SampleName = :newSample, StyleSpecs = :newSpecs",
+        UpdateExpression: "SET StyleSamples.#SampleId = :newSample, StyleSpecs = :newSpecs",
         ExpressionAttributeNames: {
-            "#SampleName": SampleId
+            "#SampleId": SampleId
         },
         ExpressionAttributeValues: {
             ":newSample": values.SampleInfo,
@@ -163,7 +163,30 @@ const addSampleById = async(values) => {
 
 // Update Sample Info
 
-// Delete a sample from an existing style -- NEED TO TEST
+const updateSampleById = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+
+    console.log(JSON.stringify(values));
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId
+        },
+        UpdateExpression: "SET StyleSamples.#SampleId = :updatedSample",
+        ExpressionAttributeNames: {
+            "#SampleId": values.SampleId
+        },
+        ExpressionAttributeValues: {
+            ":updatedSample": values.SampleInfo
+        }
+    })
+
+    return await dynamoClient.send(command);
+}
+
+// Delete a sample from an existing style
 const deleteSampleById = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
@@ -173,11 +196,10 @@ const deleteSampleById = async(values) => {
         Key: {
             "StyleId": StyleId
         },
-        UpdateExpression: "DELETE StyleSamples[:sample]",
-        ExpressionAttributeValues: {
-            ":sample": values.SampleType
-        },
-        ReturnValues: "ALL_NEW"
+        UpdateExpression: "REMOVE StyleSamples.#SampleId",
+        ExpressionAttributeNames: {
+            "#SampleId": values.SampleId
+        }
     })
 
     return await dynamoClient.send(command);
@@ -233,7 +255,7 @@ const updateSpecRow = async(values) => {
             ":UpdatedInit": values.UpdatedRow.init
         }
     }else{
-        expression = `SET StyleSpecs.#RowKey.#SampleKey = :UpdatedRow`
+        expression = `SET StyleSpecs.#RowKey.samples.#SampleKey = :UpdatedRow`
 
         attributeNames = {
             "#RowKey" : values.UpdatedRow.POMId,
@@ -291,6 +313,7 @@ module.exports = {
     editInfo,
     deleteStyleById,
     addSampleById,
+    updateSampleById,
     deleteSampleById,
     addSpecRow,
     updateSpecRow,

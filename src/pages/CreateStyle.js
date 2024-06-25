@@ -48,6 +48,7 @@ function CreateStyle( props ) {
     const [newStyle, setNewStyle] = useState({
         StyleNumber: dateNow,
         Season: seasons[0],
+        DeliveryDate: dayjs(),
         Category: categories[0],
         Commodity: commodities[0],
         FabricType: fabricTypes[0],

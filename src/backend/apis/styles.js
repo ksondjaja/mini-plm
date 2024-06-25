@@ -9,6 +9,7 @@ const {
     editInfo,
     deleteStyleById,
     addSampleById,
+    updateSampleById,
     deleteSampleById,
     addSpecRow,
     updateSpecRow,
@@ -132,24 +133,37 @@ router.post('/addSample', async (req, res) => {
     }
 })
 
+// Update a Sample by Style Id
+router.post('/updateSample', async (req, res) => {
+
+    const sample = req.body;
+
+    try {
+        const updatedSample = await updateSampleById(sample);
+        res.json(updatedSample);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
+
 // Delete a sample by Style Id
 
-// Add a row of Style's spec
-// router.post('/addSpecRow', async (req, res) => {
+router.post('/deleteSample', async (req, res) => {
 
-//     const row = req.body;
-//     console.log(row);
+    const row = req.body;
+    console.log(row);
 
-//     try {
-//         const newRow = await addSpecRow(row);        
-//         res.json(newRow);
+    try {
+        const deletedSample = await deleteSampleById(row);        
+        res.json(deletedSample);
 
-//         console.log(newRow);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({err: `Something went wrong`});
-//     }
-// })
+        console.log(deletedSample);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+})
 
 // Add a row of Style's specs
 router.post('/addSpecRow', async (req, res) => {
@@ -192,10 +206,10 @@ router.post('/deleteSpecRow', async (req, res) => {
     console.log(row);
 
     try {
-        const updatedSpecs = await deleteSpecRow(row);        
-        res.json(updatedSpecs);
+        const deletedRow = await deleteSpecRow(row);        
+        res.json(deletedRow);
 
-        console.log(updatedSpecs);
+        console.log(deletedRow);
     } catch (err) {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});

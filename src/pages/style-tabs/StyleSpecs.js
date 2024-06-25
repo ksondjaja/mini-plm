@@ -42,11 +42,8 @@ export default function StyleSpecs ( props ){
   const [columns, setColumns] = useState();
 
 
-  // Fix when specLoading is set to false. Right now sample columns don't finish loading when the page loads.
   const getColumns = async(specs) => {
-
     try{
-
       const rowCt = Object.keys(specs).length
 
       console.log('data: '+JSON.stringify(specs))
@@ -109,9 +106,6 @@ export default function StyleSpecs ( props ){
 
             allSpecs[s].push(spec)  
           }
-
-          //why do sample specs become null again when refreshed?
-          
         }
 
       }else{
@@ -211,7 +205,7 @@ export default function StyleSpecs ( props ){
 
   const handleAddPOM = () => {
 
-    // Each new POM row needs to have a row for each sample
+    // Each new POM row needs to have specs for each sample
 
     const sampleSpecs = {}
     const timeStamp = Date.now()
@@ -460,14 +454,6 @@ export default function StyleSpecs ( props ){
               />
             </Box>
 
-            {/* Map the column below --> for each sample, create a new column 
-            Fix Key so that each column & row is unique*/}
-            {samples.length>0 &&
-            <>
-              {/* {JSON.stringify(samples[0])} */}
-              {/*JSON.stringify(columns[1])*/}
-            </>
-            }
             {samples.length>0 &&
               columns[1].map((s, i)=>(
                 <Box key={i+1} display="flex" flexDirection="column" mr={1}>

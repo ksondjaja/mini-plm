@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import moment from 'moment';
 import dayjs from 'dayjs';
 import { 
     StyleAttribute
@@ -49,7 +50,7 @@ function StyleInfo( props ){
     }
 
     // Push edited style info to database
-    const updateStyle = async (styleid) => {
+    const submitUpdateStyle = async (styleid) => {
 
         const StyleId = parseInt(styleid);
 
@@ -132,7 +133,7 @@ function StyleInfo( props ){
                             Discard Edits
                         </Button>
 
-                        <Button color="primary" variant="contained" sx={{mx: 2}} onClick={()=>updateStyle(styleid)}>
+                        <Button color="primary" variant="contained" sx={{mx: 2}} onClick={()=>submitUpdateStyle(styleid)}>
                             Save Edits
                         </Button>       
                     </>   
@@ -156,7 +157,6 @@ function StyleInfo( props ){
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="primary">
                                     {styleDetails.Season}
-                                    {/* {styleDetails.DeliveryDate? JSON.stringify(styleDetails.DeliveryDate).slice(1,5) : ''} - <b>{styleDetails.Category}</b> */}
                                 </Typography>
                             </Grid>
 
@@ -173,7 +173,7 @@ function StyleInfo( props ){
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="black">
-                                    {/* Delivery Date: <b>{styleDetails.DeliveryDate.slice(0,10)}</b> */}
+                                    Delivery Date: <b>{moment(styleDetails.DeliveryDate.slice(0,10)).format('MMMM DD, YYYY')}</b>
                                 </Typography>
                             </Grid>
 

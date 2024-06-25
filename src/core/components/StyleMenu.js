@@ -26,9 +26,9 @@ export const StyleMenu = (props) => {
     return(
         <MUIAppBar
             elevation={0}
-            color="transparent"
+            //color="transparent"
             position={props.mode==="stylePage" ? "fixed": "static"}
-            sx={{ zIndex: 999, mt: (props.mode==="stylePage")? 12 : 0 }}
+            sx={{ zIndex: 999, mt: (props.mode==="stylePage")? 12 : 0, backgroundColor: "#FFFFFF" }}
         >
             <Toolbar sx={{ display: "flex", flexDirection: "column" }}>
                 <Box item sx={{ display: "flex", alignItems: "center", justifyContent: props.alignment, width: "100%", mb: 1}}>

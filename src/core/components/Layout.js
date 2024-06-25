@@ -1,9 +1,12 @@
 import React from "react";
-import { Container } from '@mui/material';
+import { Container, Box } from '@mui/material';
 
 export const Layout = ({children}) => (
     <>
-        <Container maxWidth="lg" sx={{ mt:15 }}>
+        <Box sx={{height: 15, backgroundColor: '#FFFFFF'}}/>
+        <Container maxWidth="lg"
+            //sx={{ mt:15 }}
+        >
             {children}
         </Container>
     </>
@@ -11,7 +14,10 @@ export const Layout = ({children}) => (
 
 export const StylePageLayout = ({children}) => (
     <>
-        <Container maxWidth="lg" sx={{ mt: 25 }}>
+        <Box sx={{height: 25, backgroundColor: '#FFFFFF'}}/>
+        <Container maxWidth="lg"
+            sx={{ mt: 20 }}
+        >
             {children}
         </Container>
     </>

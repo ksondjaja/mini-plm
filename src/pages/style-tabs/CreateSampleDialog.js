@@ -28,11 +28,7 @@ function CreateSampleDialog( props ){
     // Change to put a number next to each sample type, auto increment from last sample
 
     const handleOpenDialog = event => {
-        //setShowDialog(true);
         setPage(1);
-        // if(WO.includes("Fit")){
-        //     setWO("Fit");
-        // }
     }
 
     const handleRadioChange = event => {
@@ -42,10 +38,7 @@ function CreateSampleDialog( props ){
 
     const handleClickNext = event => {
         event.preventDefault();
-
         setPage(2)
-        //setShowDialog(0);
-
         //Change default Fit number depending on other samples already created
         //Below is to be edited
         setWO(`${WO}-1`);
@@ -62,12 +55,6 @@ function CreateSampleDialog( props ){
 
     return(
     <>
-        {/* <Grid item>
-            Dialog: {showDialog.toString()}
-            WO: {WO.toString()}
-        </Grid> */}
-                
-
         <Grid item>
             <Button color="primary" variant="contained" onClick={handleOpenDialog}>
                 Add Sample Specs
