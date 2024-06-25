@@ -147,6 +147,38 @@ function StyleSamples( props ){
         }
     }
 
+    const submitDeleteSample = async (SampleId) => {
+
+        const StyleId = parseInt(styleid);
+
+        const values = {
+            "StyleId": StyleId,
+            "SampleId": SampleId
+        }
+
+        try {
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + '/deleteSample'), 
+                values,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            );
+            
+            console.log('Response: ' + JSON.stringify(res.data) );
+            setPostResponse(JSON.stringify(res.data));
+
+        } catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+            setPostError(JSON.stringify(err.message));
+        } finally {
+            navigate(0);
+            // how to make sure that tab highlight "Samples" instead of "Overview"?
+        }
+    }
+
     useEffect(()=>{
         fetchSamples({
             StyleId: styleid,
@@ -255,7 +287,7 @@ function StyleSamples( props ){
                                         <Button variant="outlined" color="primary" sx={{my: 1}} onClick={()=>setEditMode(false)}>
                                             Discard Updates
                                         </Button>
-                                        <Button color="error" variant="contained" sx={{my: 1}} onClick={()=>{}}>
+                                        <Button color="error" variant="contained" sx={{my: 1}} onClick={()=>submitDeleteSample(s.id)}>
                                             Delete Sample
                                         </Button>
                                     </>
