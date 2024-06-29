@@ -239,6 +239,7 @@ function StylePage( props ) {
                         element = {
                             <StyleSamples
                                 styleid={styleid}
+                                stylename={currentStyle.StyleName}
                                 token={token}
                                 fetchSamples={fetchSamples}
                                 fetchSpecs = {fetchSpecs}

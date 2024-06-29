@@ -8,12 +8,12 @@ import {
 } from "core";
 import {
     Grid,
-    TextField,
-    Select,
-    MenuItem,
     Box,
     Typography,
-    Button
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -26,6 +26,9 @@ import {
 function StyleInfo( props ){
 
     const { styleid, styleDetails, token } = props;
+
+    const [openDialog, setOpenDialog] = useState(false);
+
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
 
@@ -78,7 +81,7 @@ function StyleInfo( props ){
     }
 
     // Delete style from database
-    const deleteStyle = async (styleid) => {
+    const submitDeleteStyle = async (styleid) => {
 
         const StyleId = parseInt(styleid)
 
@@ -98,18 +101,40 @@ function StyleInfo( props ){
         }
     }
 
-    // To be worked on...
-    const handleDeleteStyle = event => {
-        event.preventDefault();
-
-        //In popup, ask user to confirm. Then show feedback message that style has been deleted.
-
-        //After confirmation
-        deleteStyle(styleid);
-    }
-
     return(
         <>
+        <Dialog
+            open={openDialog}
+            onClose={()=>{ setOpenDialog(false) }}
+            //sx={{ }}
+        >
+            <Box p={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+                <DialogTitle>
+                    Delete <b>{styleDetails.StyleNumber} {styleDetails.StyleName}</b>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">
+                        <p>
+                            Are you sure you want to permanently delete all product information & specs related to this style?
+                        </p>
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', textAlign: 'center' }}>
+                        <Button color="primary" variant="outlined"
+                            sx={{ mx: 5 }}
+                            onClick={()=>setOpenDialog(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button color="error" variant="contained"
+                            sx={{ mx: 5 }}
+                            onClick={()=>submitDeleteStyle(styleid)}
+                        >
+                            Delete
+                        </Button>
+                    </Box>
+                </DialogContent>
+            </Box>
+        </Dialog>
             <Grid container mb={3}>
                 <Grid item xs={6} justifyContent="flex-start">
                     {!editMode ?
@@ -117,7 +142,7 @@ function StyleInfo( props ){
                             Print QR Tag
                         </Button>
                     :
-                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={handleDeleteStyle}>
+                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={()=>setOpenDialog(true)}>
                             Delete Style
                         </Button>
                     }

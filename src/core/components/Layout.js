@@ -3,7 +3,7 @@ import { Container, Box } from '@mui/material';
 
 export const Layout = ({children}) => (
     <>
-        <Box sx={{height: 15, backgroundColor: '#FFFFFF'}}/>
+        <Box sx={{height: 65, backgroundColor: '#FFFFFF'}}/>
         <Container maxWidth="lg"
             //sx={{ mt:15 }}
         >

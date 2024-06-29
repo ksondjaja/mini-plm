@@ -9,7 +9,11 @@ import {
 import {
     Grid,
     Typography,
-    Button
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    Box
 } from '@mui/material';
 
 
@@ -25,12 +29,15 @@ function StyleSamples( props ){
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
 
+    const [openDialog, setOpenDialog] = useState(null);
+
     const [editMode, setEditMode] = useState(false);
     const [splEditing, setSplEditing] = useState('')
     const [editValues, setEditValues] = useState(null)
 
     const { BACKEND_URL_STYLES,
         styleid,
+        stylename,
         token,
         fetchSpecs,
         fetchSamples,
@@ -281,13 +288,45 @@ function StyleSamples( props ){
                                 
                                 {(editMode && splEditing===s.id) ? 
                                     <>
+                                    <Dialog
+                                        open={ openDialog === s.id }
+                                        onClose={()=>{ setOpenDialog(null) }}
+                                        //sx={{ }}
+                                    >
+                                        <Box p={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+                                            <DialogTitle>
+                                                Delete <b>{s.SampleName}</b> of {styleid} {stylename}
+                                            </DialogTitle>
+                                            <DialogContent>
+                                                <Typography variant="body1">
+                                                    <p>
+                                                        Are you sure you want to permanently delete all information & specs related to this {s.SampleName} sample?
+                                                    </p>
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', textAlign: 'center' }}>
+                                                    <Button color="primary" variant="outlined"
+                                                        sx={{ mx: 5 }}
+                                                        onClick={()=>setOpenDialog(null)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button color="error" variant="contained"
+                                                        sx={{ mx: 5 }}
+                                                        onClick={()=>submitDeleteSample(s.id)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </Box>
+                                            </DialogContent>
+                                        </Box>
+                                    </Dialog>
                                         <Button color="primary" variant="contained" sx={{my: 1}} onClick={()=>submitUpdateSample(s.id)}>
                                             Save Updates
                                         </Button>  
                                         <Button variant="outlined" color="primary" sx={{my: 1}} onClick={()=>setEditMode(false)}>
                                             Discard Updates
                                         </Button>
-                                        <Button color="error" variant="contained" sx={{my: 1}} onClick={()=>submitDeleteSample(s.id)}>
+                                        <Button color="error" variant="contained" sx={{my: 1}} onClick={()=>setOpenDialog(s.id)}>
                                             Delete Sample
                                         </Button>
                                     </>
