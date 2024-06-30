@@ -3,6 +3,7 @@
 const express = require('express');
 
 const { 
+    uploadFile,
     getStylesPreview,
     getStyleById,
     addStyle,
@@ -14,11 +15,30 @@ const {
     addSpecRow,
     updateSpecRow,
     deleteSpecRow
-} = require('../config/dynamodb');
+} = require('../aws');
 
 const router = express.Router();
 
 router.use(express.json())
+
+
+router.post('/uploadFile', async (req,res) => {
+
+    //What items are in req.body? How to map it out for S3?
+
+    const fileInfo = req.body;
+    console.log(fileInfo);
+
+    try{
+        const uploadedFile = await uploadFile(fileInfo);
+        res.json(uploadedFile);
+        console.log(uploadedFile);
+    } catch(err){
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+
+})
 
 
 // api endpoint to get all Styles

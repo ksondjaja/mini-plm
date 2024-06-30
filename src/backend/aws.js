@@ -1,7 +1,27 @@
 // https://tapiwanashekanda.hashnode.dev/how-to-create-a-crud-api-using-expressjs-and-aws-dynamodb
+// https://www.youtube.com/watch?v=_DRklnnJbig&ab_channel=WebDevCody
 
 const AWS = require('aws-sdk');
 
+const variables = require('dotenv').config({ path: '../../.env.local' });
+
+console.log(variables);
+
+const config = {
+    region: process.env.AWS_DEFAULT_REGION,
+    endpoint: process.env.AWS_LOCAL_SERVER,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+    s3ForcePathStyle: true
+}
+
+// JS SDK v3 does not support global configuration.
+// Codemod has attempted to pass values to each service client in this file.
+// You may need to update clients outside of this file, if they use global config.
+AWS.config.update(config);
+
+
+// Set up DynamoDB
 const { DynamoDBDocument,
     ScanCommand,
     UpdateCommand,
@@ -11,32 +31,38 @@ const { DynamoDBDocument,
  } = require("@aws-sdk/lib-dynamodb");
 
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
-const { ConstructionOutlined } = require('@mui/icons-material');
-
-const variables = require('dotenv').config({ path: '../../.env.local' });
-
-console.log(variables);
-
-// JS SDK v3 does not support global configuration.
-// Codemod has attempted to pass values to each service client in this file.
-// You may need to update clients outside of this file, if they use global config.
-AWS.config.update({
-    region: process.env.AWS_DEFAULT_REGION,
-    endpoint: process.env.AWS_LOCAL_SERVER,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-    s3ForcePathStyle: true
-});
 
 const dynamoClient = DynamoDBDocument.from(new DynamoDB());
-
 const TABLE_STYLES = "mini-plm-styles";
 
 
-// TO-DO LIST
-// Create method to save Work Orders/Sample status
-// Create method to save Sample Specs
 
+// Set up S3
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const BUCKET = 'mini-plm-images'
+
+const s3 = new S3Client(config);
+
+
+
+
+// --------- S3 METHODS ---------
+
+// Upload file to S3 bucket
+const uploadFile = async (params) => {
+
+    const command = new PutObjectCommand({
+        Body: params.fileBody,
+        Bucket: BUCKET,
+        Key: params.fileName
+    });
+    const response = await s3.send(command);
+
+    return response;
+}
+
+
+// --------- DYNAMODB METHODS ---------
 
 // Get Styles to display in Home page
 const getStylesPreview = async () => {
@@ -307,6 +333,7 @@ const deleteSpecRow = async(values) => {
 
 module.exports = {
     dynamoClient,
+    uploadFile,
     getStylesPreview,
     getStyleById,
     addStyle,

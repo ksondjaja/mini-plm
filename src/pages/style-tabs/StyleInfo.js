@@ -21,13 +21,17 @@ import {
     LocalizationProvider,
     DatePicker
 } from '@mui/x-date-pickers/';
+import UploadImageDialog from './UploadImageDialog';
 
 
 function StyleInfo( props ){
 
     const { styleid, styleDetails, token } = props;
 
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openUploadDialog, setOpenUploadDialog] = useState(false)
+
+    const [fileToUpload, setFileToUpload] = useState(null);
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
@@ -51,6 +55,7 @@ function StyleInfo( props ){
             [name]: value
         })
     }
+
 
     // Push edited style info to database
     const submitUpdateStyle = async (styleid) => {
@@ -101,12 +106,47 @@ function StyleInfo( props ){
         }
     }
 
+    // Upload image to S3 bucket
+    // Figure out how to upload multiple files & show preview
+    const submitFileUpload = async() => {
+
+        const timestamp = Date.now();
+        const formData = new FormData();
+
+
+        //How are the parameters read in the server?
+        formData.append(
+            `IMG${timestamp}`,
+            fileToUpload,
+            fileToUpload.name
+        );
+
+        console.log(fileToUpload);
+
+        try{
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + '/uploadFile'),
+                formData,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+            setOpenUploadDialog(false)
+            navigate(0);
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }
+
+    };
+
     return(
         <>
         <Dialog
-            open={openDialog}
-            onClose={()=>{ setOpenDialog(false) }}
-            //sx={{ }}
+            open={openDeleteDialog}
+            onClose={()=>{ setOpenDeleteDialog(false) }}
         >
             <Box p={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
                 <DialogTitle>
@@ -121,7 +161,7 @@ function StyleInfo( props ){
                     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', textAlign: 'center' }}>
                         <Button color="primary" variant="outlined"
                             sx={{ mx: 5 }}
-                            onClick={()=>setOpenDialog(false)}
+                            onClick={()=>setOpenDeleteDialog(false)}
                         >
                             Cancel
                         </Button>
@@ -135,6 +175,15 @@ function StyleInfo( props ){
                 </DialogContent>
             </Box>
         </Dialog>
+
+        <UploadImageDialog
+            openUploadDialog = {openUploadDialog}
+            setOpenUploadDialog = {setOpenUploadDialog}
+            fileToUpload = {fileToUpload}
+            setFileToUpload = {setFileToUpload}
+            submitFileUpload = {submitFileUpload}
+        />
+
             <Grid container mb={3}>
                 <Grid item xs={6} justifyContent="flex-start">
                     {!editMode ?
@@ -142,7 +191,7 @@ function StyleInfo( props ){
                             Print QR Tag
                         </Button>
                     :
-                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={()=>setOpenDialog(true)}>
+                        <Button color="error" variant="contained" sx={{mx: 2}} onClick={()=>setOpenDeleteDialog(true)}>
                             Delete Style
                         </Button>
                     }
@@ -168,9 +217,14 @@ function StyleInfo( props ){
 
 
             <Grid container display="flex" justifyContent="stretch" spacing={2}>
-                <Grid item sm={6}>
-                    <Box sx={{ height: "100%", bgcolor: "black"}}>
+                <Grid item sm={6} display="flex" flexDirection="column">
+                    <Box sx={{ height: "100%", bgcolor: "black", mb: 2}}>
                         {/* Style Image Here */}
+                    </Box>
+                    <Box>
+                        <Button variant="contained" component="span" onClick={()=>setOpenUploadDialog(true)}>
+                            Upload Image
+                        </Button>
                     </Box>
                 </Grid>
 
