@@ -9,10 +9,9 @@ console.log(variables);
 
 const config = {
     region: process.env.AWS_DEFAULT_REGION,
-    endpoint: process.env.AWS_LOCAL_SERVER,
+    endpoint: process.env.AWS_BUCKET_URL,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_KEY,
-    s3ForcePathStyle: true
 }
 
 // JS SDK v3 does not support global configuration.
@@ -39,7 +38,7 @@ const TABLE_STYLES = "mini-plm-styles";
 
 // Set up S3
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const BUCKET = 'mini-plm-images'
+const BUCKET = process.env.AWS_BUCKET_NAME
 
 const s3 = new S3Client(config);
 
@@ -51,11 +50,7 @@ const s3 = new S3Client(config);
 // Upload file to S3 bucket
 const uploadFile = async (params) => {
 
-    const command = new PutObjectCommand({
-        Body: params.fileBody,
-        Bucket: BUCKET,
-        Key: params.fileName
-    });
+    const command = new PutObjectCommand(params);
     const response = await s3.send(command);
 
     return response;

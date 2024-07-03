@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
+import moment from 'moment';
 import {
     Box,
     Typography,
@@ -22,20 +23,18 @@ import {
 
 export const HasDateInput = props => {
 
-    // How to replace "enter date" item with saved date if date exists? 
-
     const [hasDate, setHasDate] = useState(props.inputData==='none'? false: true)
-    const [inputValue, setInputValue] = useState(props.inputData==='none' ? 'none': props.inputData)
+    const [dropdownValue, setDropdownValue] = useState(props.inputData==='none' ? 'none': 'has date')
 
     const handleAddDate = event => {
         const value = event.target.value;
 
         if(value==="has date"){
             setHasDate(true)
-            setInputValue('has date')
+            setDropdownValue('has date')
         }else{
             setHasDate(false)
-            setInputValue('none')
+            setDropdownValue('none')
         }
     }
 
@@ -43,7 +42,7 @@ export const HasDateInput = props => {
         <Box display="flex" flexDirection="column" my={2}>
             <TextField
                 select="true"
-                value={inputValue}
+                value={dropdownValue}
                 label={props.inputLabel}
                 name={props.input}
                 onChange={handleAddDate}
@@ -51,7 +50,14 @@ export const HasDateInput = props => {
                 {...props}
             >
                 <MenuItem value={'none'}>not yet</MenuItem>
-                <MenuItem value={'has date'}>enter date</MenuItem>
+                <MenuItem value={'has date'}>
+                    {dropdownValue!==('none'||'has date') && (props.inputData!=='none')?
+                        <>date entered</>
+                    :
+                        <>enter date</>
+                    }
+                </MenuItem>
+                
             </TextField>
 
             {hasDate &&
@@ -62,7 +68,7 @@ export const HasDateInput = props => {
                             label={(props.inputLabel)+' Date'}
                             name={'date-'+ (props.input)}
                             views={['year', 'month', 'day']}
-                            value={dayjs(inputValue) ?? dayjs()}
+                            value={dayjs(props.inputData) ?? dayjs()}
                             onChange={props.dateOnChange}
                             {...props}
                         />

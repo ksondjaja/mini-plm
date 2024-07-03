@@ -31,12 +31,14 @@ function StyleInfo( props ){
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openUploadDialog, setOpenUploadDialog] = useState(false)
 
-    const [fileToUpload, setFileToUpload] = useState(null);
+    const [filesToUpload, setFilesToUpload] = useState(null);
+    const [imagesToUpload, setImagesToUpload] = useState(null);
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
 
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+    const BUCKET = 'mini-plm-images'
     const navigate = useNavigate()
     
     // Handle form change to edit style info
@@ -113,20 +115,29 @@ function StyleInfo( props ){
         const timestamp = Date.now();
         const formData = new FormData();
 
+        const fileExtension = filesToUpload.name.split('.')[1]
+
+        //console.log(filesToUpload)
+
 
         //How are the parameters read in the server?
-        formData.append(
-            `IMG${timestamp}`,
-            fileToUpload,
-            fileToUpload.name
-        );
 
-        console.log(fileToUpload);
+        formData.append(
+            `STY${styleid}_IMG${timestamp}`,
+            filesToUpload,
+            `STY${styleid}_IMG${timestamp}.${fileExtension}`
+        )
+
+        const params = {
+            Body: formData,
+            Bucket: BUCKET,
+            Key: `STY${styleid}_IMG${timestamp}.${fileExtension}`
+        }
 
         try{
             const res = await axios.post(
                 (BACKEND_URL_STYLES + '/uploadFile'),
-                formData,
+                params,
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
@@ -179,9 +190,11 @@ function StyleInfo( props ){
         <UploadImageDialog
             openUploadDialog = {openUploadDialog}
             setOpenUploadDialog = {setOpenUploadDialog}
-            fileToUpload = {fileToUpload}
-            setFileToUpload = {setFileToUpload}
+            filesToUpload = {filesToUpload}
+            setFilesToUpload = {setFilesToUpload}
             submitFileUpload = {submitFileUpload}
+            imagesToUpload = {imagesToUpload}
+            setImagesToUpload = {setImagesToUpload}
         />
 
             <Grid container mb={3}>

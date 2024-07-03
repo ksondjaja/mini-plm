@@ -24,13 +24,13 @@ router.use(express.json())
 
 router.post('/uploadFile', async (req,res) => {
 
-    //What items are in req.body? How to map it out for S3?
+    //If passing an array with FormData + name in array - TypeError [ERR_INVALID_ARG_TYPE]: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of Object
+    //If passing only req.body, don't know how to get file name from FormData to use as Key in S3 Bucket
 
-    const fileInfo = req.body;
-    console.log(fileInfo);
+    const params = req.body
 
     try{
-        const uploadedFile = await uploadFile(fileInfo);
+        const uploadedFile = await uploadFile(params);
         res.json(uploadedFile);
         console.log(uploadedFile);
     } catch(err){
