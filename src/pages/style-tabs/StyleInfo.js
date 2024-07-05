@@ -38,7 +38,6 @@ function StyleInfo( props ){
     const [editValues, setEditValues] = useState(styleDetails)
 
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
-    const BUCKET = 'mini-plm-images'
     const navigate = useNavigate()
     
     // Handle form change to edit style info
@@ -128,11 +127,7 @@ function StyleInfo( props ){
             `STY${styleid}_IMG${timestamp}.${fileExtension}`
         )
 
-        const params = {
-            Body: formData,
-            Bucket: BUCKET,
-            Key: `STY${styleid}_IMG${timestamp}.${fileExtension}`
-        }
+        const params = [formData, `STY${styleid}_IMG${timestamp}.${fileExtension}`]
 
         try{
             const res = await axios.post(

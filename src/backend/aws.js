@@ -50,10 +50,21 @@ const s3 = new S3Client(config);
 // Upload file to S3 bucket
 const uploadFile = async (params) => {
 
-    const command = new PutObjectCommand(params);
-    const response = await s3.send(command);
+    var arrayBuffer = new ArrayBuffer(params[0]);
+    const buffer = Buffer.from(arrayBuffer);
 
-    return response;
+    const command = new PutObjectCommand({
+        Body: buffer,
+        Bucket: BUCKET,
+        Key: params[1]
+    });
+
+    try{
+        const response = await s3.send(command);
+        return response;
+    }catch(err){
+        console.log("Error: "+JSON.stringify(err));
+    }
 }
 
 
