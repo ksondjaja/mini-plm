@@ -37,7 +37,10 @@ const TABLE_STYLES = "mini-plm-styles";
 
 
 // Set up S3
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client,
+    PutObjectCommand,
+    GetObjectCommand
+} = require("@aws-sdk/client-s3");
 const BUCKET = process.env.AWS_BUCKET_NAME
 
 const s3 = new S3Client(config);
@@ -47,7 +50,22 @@ const s3 = new S3Client(config);
 
 // --------- S3 METHODS ---------
 
-// Upload file to S3 bucket
+// Get image from S3 Bucket
+const getFile = async (params) => {
+    const command = new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: params
+    });
+
+    try{
+        const response = await s3.send(command);
+        return response;
+    }catch(err){
+        console.log("Error: "+JSON.stringify(err));
+    }
+}
+
+// Upload image to S3 bucket
 const uploadFile = async (params) => {
 
     var arrayBuffer = new ArrayBuffer(params[0]);
@@ -56,7 +74,8 @@ const uploadFile = async (params) => {
     const command = new PutObjectCommand({
         Body: buffer,
         Bucket: BUCKET,
-        Key: params[1]
+        Key: params[1],
+        ContentType: `image/${params[2]}`
     });
 
     try{
@@ -137,7 +156,7 @@ const addStyle = async (style) => {
 }
 
 // Update general Style Info
-const editInfo = async(values) => {
+const editStyle = async(values) => {
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
@@ -237,12 +256,32 @@ const deleteSampleById = async(values) => {
     return await dynamoClient.send(command);
 }
 
+// Add info of style images when uploaded
+const addFileInfo = async(values) => {
+
+    const StyleId = parseInt(values.StyleId);
+
+    const command = new UpdateCommand({
+        TableName: TABLE_STYLES,
+        Key: {
+            "StyleId": StyleId,
+        },
+        UpdateExpression: `SET StyleImages.#ImageId= :NewImage`,
+        ExpressionAttributeNames: {
+            "#ImageId" : values.ImageId
+        },
+        ExpressionAttributeValues: {
+            ":NewRow": values.ImageInfo
+        }
+    })
+
+    return await dynamoClient.send(command);
+}
+
 // Add new row of Spec for all samples
 const addSpecRow = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
-    // console.log(StyleId);
-    // console.log(values.NewRow)
 
     const command = new UpdateCommand({
         TableName: TABLE_STYLES,
@@ -339,12 +378,14 @@ const deleteSpecRow = async(values) => {
 
 module.exports = {
     dynamoClient,
+    getFile,
     uploadFile,
     getStylesPreview,
     getStyleById,
     addStyle,
-    editInfo,
+    editStyle,
     deleteStyleById,
+    addFileInfo,
     addSampleById,
     updateSampleById,
     deleteSampleById,

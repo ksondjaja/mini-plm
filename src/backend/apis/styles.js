@@ -3,12 +3,14 @@
 const express = require('express');
 
 const { 
+    getFile,
     uploadFile,
     getStylesPreview,
     getStyleById,
     addStyle,
-    editInfo,
+    editStyle,
     deleteStyleById,
+    addFileInfo,
     addSampleById,
     updateSampleById,
     deleteSampleById,
@@ -22,21 +24,40 @@ const router = express.Router();
 router.use(express.json())
 
 
-router.post('/uploadFile', async (req,res) => {
+// Get images from S3 Bucket
+router.post('/getFile', async (req,res) => {
 
-    //If passing an array with FormData + name in array OR entire mapped data in frontend - TypeError [ERR_INVALID_ARG_TYPE]: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of Object
-    //If passing only req.body, don't know how to get file name from FormData to use as Key in S3 Bucket
+    const imageNames = req.body
+    
+    let images = []
+
+    for(let i=0; i<imageNames.length; i++){
+        try{
+            const image = await getFile(imageNames[1]);
+            images.push(image);
+        } catch(err){
+            console.error(err);
+            res.status(500).json({err: `Something went wrong`});
+        }
+    }
+
+    res.json(images);
+})
+
+// Upload image to S3 Bucket
+router.post('/uploadFile', async (req,res) => {
 
     const params = req.body
 
     try{
         const uploadedFile = await uploadFile(params);
         res.json(uploadedFile);
-        console.log(uploadedFile);
     } catch(err){
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
     }
+
+    
 
 })
 
@@ -112,7 +133,7 @@ router.post('/update/:id', async(req, res) => {
     const style = req.body;
 
     try {
-        const updatedStyle = await editInfo(style);
+        const updatedStyle = await editStyle(style);
         res.json(updatedStyle);
         console.log(updatedStyle);
     } catch (err) {
@@ -137,6 +158,20 @@ router.delete('/delete/:id', async (req, res) => {
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
     }
+})
+
+router.post('/addFileInfo', async (req,res) =>{
+
+    const imageInfo = req.body;
+
+    try{
+        const newImageInfo = await addFileInfo(imageInfo);
+        res.json(newImageInfo)
+    }catch(err){
+        console.error(err);
+        res.status(500).json({err: `Something went wrong`});
+    }
+
 })
 
 // Add new Sample by Style Id

@@ -33,6 +33,7 @@ function StyleInfo( props ){
 
     const [filesToUpload, setFilesToUpload] = useState(null);
     const [imagesToUpload, setImagesToUpload] = useState(null);
+    const [imagesInfo, setImagesInfo] = useState(null)
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
@@ -107,19 +108,15 @@ function StyleInfo( props ){
         }
     }
 
-    // Upload image to S3 bucket
-    // Figure out how to upload multiple files & show preview
-    const submitFileUpload = async() => {
+    // Submit Image files to backend/database/bucket
+    const handleFileUpload = event => {
+
+        event.preventDefault();
 
         const timestamp = Date.now();
         const formData = new FormData();
 
         const fileExtension = filesToUpload.name.split('.')[1]
-
-        //console.log(filesToUpload)
-
-
-        //How are the parameters read in the server?
 
         formData.append(
             `STY${styleid}_IMG${timestamp}`,
@@ -127,12 +124,32 @@ function StyleInfo( props ){
             `STY${styleid}_IMG${timestamp}.${fileExtension}`
         )
 
-        const params = [formData, `STY${styleid}_IMG${timestamp}.${fileExtension}`]
+        const imageFile = [formData, `STY${styleid}_IMG${timestamp}.${fileExtension}`, fileExtension]
+
+        const imageData = {
+            StyleId: styleid,
+            ImageId:  `IMG${timestamp}`,
+            ImageInfo: {
+                FileName: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
+                Title: imagesInfo.ImageTitle,
+                Tag: imagesInfo.ImageTag,
+                Notes: imagesInfo.ImageNotes
+            }
+        }
+
+        submitFileUpload(imageFile)
+        submitFileInfo(imageData)
+    }
+
+
+    // Upload image to S3 bucket
+    // Figure out how to upload multiple files & show preview
+    const submitFileUpload = async(imageFile) => {
 
         try{
             const res = await axios.post(
                 (BACKEND_URL_STYLES + '/uploadFile'),
-                params,
+                imageFile,
                 {
                     headers: {
                         Authorization: 'Bearer ' + token
@@ -147,6 +164,27 @@ function StyleInfo( props ){
         }
 
     };
+
+    // Record image file names & info in database
+
+    const submitFileInfo = async(imageInfo) => {
+        try{
+            const res = await axios.post(
+                (BACKEND_URL_STYLES + '/addFileInfo'),
+                imageInfo,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+            setOpenUploadDialog(false)
+            navigate(0);
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }
+    }
 
     return(
         <>
@@ -187,9 +225,11 @@ function StyleInfo( props ){
             setOpenUploadDialog = {setOpenUploadDialog}
             filesToUpload = {filesToUpload}
             setFilesToUpload = {setFilesToUpload}
-            submitFileUpload = {submitFileUpload}
+            handleFileUpload = {handleFileUpload}
             imagesToUpload = {imagesToUpload}
             setImagesToUpload = {setImagesToUpload}
+            imagesInfo = {imagesInfo}
+            setImagesInfo = {setImagesInfo}
         />
 
             <Grid container mb={3}>

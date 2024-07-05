@@ -13,7 +13,9 @@ import {
     Button,
     Dialog,
     DialogTitle,
-    DialogContent
+    DialogContent,
+    TextField,
+    MenuItem
 } from '@mui/material';
 
 function UploadImageDialog (props){
@@ -27,9 +29,22 @@ function UploadImageDialog (props){
         setFilesToUpload,
         imagesToUpload,
         setImagesToUpload,
-        submitFileUpload } = props;
+        imagesInfo,
+        setImagesInfo,
+        handleFileUpload } = props;
+
+    const imageTags = ["Design Sketch", "Colors", "Graphic", "Material", "Construction", "Reference"]
 
     const [previewImages, setPreviewImages] = useState([]);
+
+    const handleImageInfoChange = event => {
+        const value = event.target.value
+  
+        setImagesInfo({
+          ...imagesInfo,
+        [event.target.name]: value
+        });
+    }
 
     const handleFileSelect = (event) => {
 
@@ -45,6 +60,10 @@ function UploadImageDialog (props){
         console.log(file);
 
         setFilesToUpload(file)
+
+        setImagesInfo({
+            ImageTitle: file.name
+        })
 
         // let fileObject = []
         // let fileReaders = []
@@ -114,17 +133,60 @@ function UploadImageDialog (props){
                         })
                     } */}
 
-
+                    <Grid container spacing={2} display="flex" justifyContent="center">
                     {/* Preview & Upload only 1 file */}
                     {filesToUpload !== null && previewImages &&
-                        <Box>
-                            <img src={previewImages} alt="preview-image" style={{ width: '30%'}}/>
-                            <Typography variant="body1">
-                                File Name: {filesToUpload.name}<br/>
-                                File Type: {filesToUpload.type}<br/>
-                            </Typography>
-                        </Box>  
-                     }
+                        <Grid item xs={4}>
+                                <img src={previewImages} alt="preview-image" style={{ width: '100%'}}/>
+                                <Typography variant="body1" sx={{ my: 2 }}>
+                                    File Name: {filesToUpload.name}<br/>
+                                    File Type: {filesToUpload.type}<br/>
+                                </Typography>
+                                <Box>
+                                    <TextField
+                                        id="image-title"
+                                        label="Title"
+                                        name="ImageTitle"
+                                        value={imagesInfo.ImageTitle?? ''}
+                                        onChange={handleImageInfoChange}
+                                        fullWidth
+                                        sx={{mb: 2}}
+                                        required
+                                    />
+
+                                    <TextField
+                                        labelId="select-image-tag"
+                                        id="image-tag"
+                                        value={imagesInfo.ImageTag?? imageTags[0]}
+                                        label="Tag"
+                                        name="ImageTag"
+                                        onChange={handleImageInfoChange}
+                                        select
+                                        fullWidth
+                                        sx={{mb: 2, textAlign: 'left'}}
+                                    >
+                                        {imageTags.map((tag, i)=>(
+                                            <MenuItem key={i} value={tag}>
+                                                {tag}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+
+                                    <TextField
+                                        id="image-notes"
+                                        label="Notes"
+                                        name="ImageNotes"
+                                        value={imagesInfo.ImageNotes?? ''}
+                                        onChange={handleImageInfoChange}
+                                        fullWidth
+                                        multiline
+                                        rows={2}
+                                        sx={{mb: 2}}
+                                    />  
+                                </Box>
+                        </Grid>  
+                    }
+                    </Grid>
                     
                     <Box sx={{ mt: 3}}>
                         <input
@@ -146,7 +208,7 @@ function UploadImageDialog (props){
                                         Change Image File
                                     </Button>
 
-                                    <Button variant="contained" sx={{ mx: 5}} onClick={submitFileUpload}>
+                                    <Button variant="contained" sx={{ mx: 5}} onClick={handleFileUpload}>
                                         Upload File
                                     </Button>
 
