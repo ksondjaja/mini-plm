@@ -22,8 +22,12 @@ function StylePage( props ) {
     const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
 
     const [currentStyle, setCurrentStyle] = useState();
+    const [currentStyleImages, setCurrentStyleImages] = useState();
+    const [loadedImages, setLoadedImages] = useState();
+
     const [loading, setLoading] = useState(true);
     const [specLoading, setSpecLoading] = useState(true);
+    const [imageLoading, setImageLoading] = useState(true);
 
     const [postResponse, setPostResponse] = useState();
     const [postError, setPostError] = useState();
@@ -80,6 +84,21 @@ function StylePage( props ) {
         },
     ]
 
+    const handleLoadStylePage = async() => {
+        const stylePage = await fetchStyle({
+                                    StyleId: params["id"],
+                                    Attributes: "StyleInfo, StyleImages"
+                                }, token)
+
+        const styleInfo = stylePage[0]
+        const styleImages = stylePage[1]
+
+        const images = await fetchImages(styleImages)
+        
+        setCurrentStyle(styleInfo)
+        setCurrentStyleImages(images)
+    }
+
 
     const fetchStyle = async (style, token) => {
   
@@ -97,13 +116,55 @@ function StylePage( props ) {
             )
             console.log('Response: ' + JSON.stringify(res.data));
 
-            setCurrentStyle((res.data)["Item"]["StyleInfo"])
+            //setCurrentStyle((res.data)["Item"]["StyleInfo"])
+
+            //setCurrentStyleImages((res.data)["Item"]["StyleImages"])
 
             console.log(currentStyle);
+
+            const styleInfo = (res.data)["Item"]["StyleInfo"]
+
+            const styleImages = (res.data)["Item"]["StyleImages"]
+
+            return [styleInfo, styleImages];
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }finally{
-            setLoading(false);
+            //setLoading(false);
+        }
+    }
+
+    const fetchImages = async(styleImages) => {
+
+        const imageList = []
+
+        for(const [key, value] of Object.entries(styleImages)){
+            imageList.push(value.FileName)
+        }
+
+        console.log(JSON.stringify(imageList))
+
+        try{
+            const res = await axios.get(
+                (BACKEND_URL_STYLES + '/viewImages'),
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    },
+                    params: {
+                        images: imageList
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+
+            console.log("fetch images")
+
+            return res.data;
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }finally{
+            //setImageLoading(false);
         }
     }
 
@@ -197,11 +258,13 @@ function StylePage( props ) {
     
 
     useEffect(()=>{
-        fetchStyle({
-            StyleId: params["id"],
-            Attributes: "StyleInfo, StyleImages"
-        }, token);
-        console.log(styleUrl);
+        handleLoadStylePage()
+        .then(
+            ()=>{
+                setLoading(false)
+                setImageLoading(false)
+            }
+        )
         return() => controller.abort();
     }, [token]);
 
@@ -229,6 +292,9 @@ function StylePage( props ) {
                             <StyleInfo
                                 styleid={styleid}
                                 styleDetails = {currentStyle}
+                                styleImages = {currentStyleImages}
+                                loadedImages = {loadedImages}
+                                imageLoading = {imageLoading}
                                 token = {token}
                                 {...props}
                             />

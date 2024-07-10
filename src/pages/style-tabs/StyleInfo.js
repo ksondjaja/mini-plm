@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import moment from 'moment';
@@ -26,7 +26,7 @@ import UploadImageDialog from './UploadImageDialog';
 
 function StyleInfo( props ){
 
-    const { styleid, styleDetails, token } = props;
+    const { styleid, styleDetails, styleImages, imageLoading, loadedImages, token } = props;
 
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openUploadDialog, setOpenUploadDialog] = useState(false)
@@ -138,7 +138,7 @@ function StyleInfo( props ){
         }
 
         submitFileUpload(imageFile)
-        submitFileInfo(imageData)
+        submitImageInfo(imageData)
     }
 
 
@@ -157,8 +157,8 @@ function StyleInfo( props ){
                 }
             )
             console.log('Response: ' + JSON.stringify(res.data));
-            setOpenUploadDialog(false)
-            navigate(0);
+            //setOpenUploadDialog(false)
+            //navigate(0);
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }
@@ -167,10 +167,10 @@ function StyleInfo( props ){
 
     // Record image file names & info in database
 
-    const submitFileInfo = async(imageInfo) => {
+    const submitImageInfo = async(imageInfo) => {
         try{
             const res = await axios.post(
-                (BACKEND_URL_STYLES + '/addFileInfo'),
+                (BACKEND_URL_STYLES + '/addImageInfo'),
                 imageInfo,
                 {
                     headers: {
@@ -266,9 +266,23 @@ function StyleInfo( props ){
 
             <Grid container display="flex" justifyContent="stretch" spacing={2}>
                 <Grid item sm={6} display="flex" flexDirection="column">
-                    <Box sx={{ height: "100%", bgcolor: "black", mb: 2}}>
-                        {/* Style Image Here */}
-                    </Box>
+                    {Object.keys(styleImages).length>0 && !imageLoading && loadedImages &&
+
+                        <>
+                        {loadedImages.map((image, i)=>{
+                            <Box sx={{ height: "100%", mb: 2}}>
+                                <p>{JSON.stringify(image)}</p>
+                                <img src={image} style={{ width: '100%'}}/>
+                            </Box>
+                        })}
+                        </>
+                    }
+
+                    {Object.keys(styleImages).length===0 &&
+                    <>
+                        <Box sx={{ height: "100%", bgcolor: "black", mb: 2}} />
+                    </>
+                    }
                     <Box>
                         <Button variant="contained" component="span" onClick={()=>setOpenUploadDialog(true)}>
                             Upload Image

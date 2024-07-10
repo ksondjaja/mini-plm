@@ -109,7 +109,9 @@ function CreateStyle( props ) {
             StyleId: dateNow,
             StyleInfo: newStyle,
             StyleSamples: {},
-            StyleSpecs: {}
+            StyleSpecs: {},
+            StyleGrading: {},
+            StyleImages: {}
         }
 
         submitStyleData(styleData);

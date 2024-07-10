@@ -41,6 +41,8 @@ const { S3Client,
     PutObjectCommand,
     GetObjectCommand
 } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
 const BUCKET = process.env.AWS_BUCKET_NAME
 
 const s3 = new S3Client(config);
@@ -50,6 +52,21 @@ const s3 = new S3Client(config);
 
 // --------- S3 METHODS ---------
 
+// Get signed URL to view images from S3 Bucket
+// Why is image not showing at all from presigned URL?? Not even an error message
+const getImageSignedURL = async (params) => {
+    const command = new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: params,
+        Expires: 60 * 60,
+        ContentType: 'image/*'
+    });
+
+    const url = await getSignedUrl(s3, command, {expiresIn: 3600})
+
+    return url;
+
+}
 // Get image from S3 Bucket
 const getFile = async (params) => {
     const command = new GetObjectCommand({
@@ -134,6 +151,8 @@ const addStyle = async (style) => {
     const info = style.StyleInfo;
     const samples = style.StyleSamples;
     const specs = style.StyleSpecs;
+    const grading = style.StyleGrading;
+    const images = style.StyleImages
 
     console.log(id);
     console.log(info);
@@ -145,8 +164,8 @@ const addStyle = async (style) => {
             "StyleInfo": info,
             "StyleSamples": samples,
             "StyleSpecs": specs,
-            "StyleGrading": null,
-            "StyleImages": null
+            "StyleGrading": grading,
+            "StyleImages": images
         }
     });
 
@@ -257,7 +276,7 @@ const deleteSampleById = async(values) => {
 }
 
 // Add info of style images when uploaded
-const addFileInfo = async(values) => {
+const addImageInfo = async(values) => {
 
     const StyleId = parseInt(values.StyleId);
 
@@ -271,7 +290,7 @@ const addFileInfo = async(values) => {
             "#ImageId" : values.ImageId
         },
         ExpressionAttributeValues: {
-            ":NewRow": values.ImageInfo
+            ":NewImage": values.ImageInfo
         }
     })
 
@@ -378,6 +397,7 @@ const deleteSpecRow = async(values) => {
 
 module.exports = {
     dynamoClient,
+    getImageSignedURL,
     getFile,
     uploadFile,
     getStylesPreview,
@@ -385,7 +405,7 @@ module.exports = {
     addStyle,
     editStyle,
     deleteStyleById,
-    addFileInfo,
+    addImageInfo,
     addSampleById,
     updateSampleById,
     deleteSampleById,

@@ -3,6 +3,7 @@
 const express = require('express');
 
 const { 
+    getImageSignedURL,
     getFile,
     uploadFile,
     getStylesPreview,
@@ -10,7 +11,7 @@ const {
     addStyle,
     editStyle,
     deleteStyleById,
-    addFileInfo,
+    addImageInfo,
     addSampleById,
     updateSampleById,
     deleteSampleById,
@@ -23,9 +24,31 @@ const router = express.Router();
 
 router.use(express.json())
 
+// Get image signed URL to view from S3 Bucket
+router.get('/viewImages', async (req,res) => {
 
-// Get images from S3 Bucket
-router.post('/getFile', async (req,res) => {
+    const imageNames = req.query.images;
+
+    console.log("images: "+JSON.stringify(imageNames))
+    
+    let images = []
+
+    for(let i=0; i<imageNames.length; i++){
+        try{
+            const image = await getImageSignedURL(imageNames[i]);
+            const imageURL = Buffer.from(image, 'utf-8').toString()
+            images.push(imageURL);
+        } catch(err){
+            console.error(err);
+            res.status(500).json({err: `Something went wrong`});
+        }
+    }
+
+    res.json(images);
+})
+
+// Get images to download from S3 Bucket
+router.get('/getFiles', async (req,res) => {
 
     const imageNames = req.body
     
@@ -33,7 +56,7 @@ router.post('/getFile', async (req,res) => {
 
     for(let i=0; i<imageNames.length; i++){
         try{
-            const image = await getFile(imageNames[1]);
+            const image = await getFile(imageNames[i]);
             images.push(image);
         } catch(err){
             console.error(err);
@@ -160,12 +183,12 @@ router.delete('/delete/:id', async (req, res) => {
     }
 })
 
-router.post('/addFileInfo', async (req,res) =>{
+router.post('/addImageInfo', async (req,res) =>{
 
     const imageInfo = req.body;
 
     try{
-        const newImageInfo = await addFileInfo(imageInfo);
+        const newImageInfo = await addImageInfo(imageInfo);
         res.json(newImageInfo)
     }catch(err){
         console.error(err);
