@@ -18,6 +18,7 @@ import {
     MenuItem
 } from '@mui/material';
 
+
 function UploadImageDialog (props){
 
     //https://www.geeksforgeeks.org/file-uploading-in-react-js/
@@ -51,13 +52,12 @@ function UploadImageDialog (props){
         //How to preview & upload multiple files using File Reader?
 
         const file = event.target.files[0];
+
         const fileReader = new FileReader();
         fileReader.addEventListener("load", () => {
             setPreviewImages(fileReader.result);
         });
         fileReader.readAsDataURL(file);
-
-        console.log(file);
 
         setFilesToUpload(file)
 

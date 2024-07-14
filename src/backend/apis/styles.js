@@ -52,6 +52,7 @@ router.get('/getFiles', async (req,res) => {
 
     const imageNames = req.body
     
+    // On Frontend can change to enable downloading file only one-by-one, or as 1 zipped file
     let images = []
 
     for(let i=0; i<imageNames.length; i++){
@@ -70,17 +71,14 @@ router.get('/getFiles', async (req,res) => {
 // Upload image to S3 Bucket
 router.post('/uploadFile', async (req,res) => {
 
-    const params = req.body
-
     try{
-        const uploadedFile = await uploadFile(params);
+        const uploadedFile = await uploadFile(req);
         res.json(uploadedFile);
+        console.log('uploaded')
     } catch(err){
         console.error(err);
         res.status(500).json({err: `Something went wrong`});
     }
-
-    
 
 })
 

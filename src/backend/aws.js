@@ -2,16 +2,18 @@
 // https://www.youtube.com/watch?v=_DRklnnJbig&ab_channel=WebDevCody
 
 const AWS = require('aws-sdk');
+const Busboy = require('busboy');
 
 const variables = require('dotenv').config({ path: '../../.env.local' });
 
-console.log(variables);
+//console.log(variables);
 
 const config = {
     region: process.env.AWS_DEFAULT_REGION,
     endpoint: process.env.AWS_BUCKET_URL,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_KEY,
+    signatureVersion: 'v2'
 }
 
 // JS SDK v3 does not support global configuration.
@@ -53,13 +55,16 @@ const s3 = new S3Client(config);
 // --------- S3 METHODS ---------
 
 // Get signed URL to view images from S3 Bucket
-// Why is image not showing at all from presigned URL?? Not even an error message
 const getImageSignedURL = async (params) => {
+
+    const extension = params.split('.')[1];
+    //console.log(extension);
+
     const command = new GetObjectCommand({
         Bucket: BUCKET,
         Key: params,
         Expires: 60 * 60,
-        ContentType: 'image/*'
+        ContentType: `image/${extension}`
     });
 
     const url = await getSignedUrl(s3, command, {expiresIn: 3600})
@@ -83,21 +88,51 @@ const getFile = async (params) => {
 }
 
 // Upload image to S3 bucket
-const uploadFile = async (params) => {
+const uploadFile = async (req) => {
 
-    var arrayBuffer = new ArrayBuffer(params[0]);
-    const buffer = Buffer.from(arrayBuffer);
+    const bb = new Busboy({ headers: req.headers })
 
-    const command = new PutObjectCommand({
-        Body: buffer,
-        Bucket: BUCKET,
-        Key: params[1],
-        ContentType: `image/${params[2]}`
-    });
-
+    // S3 keeps giving timeout error, why???
     try{
-        const response = await s3.send(command);
-        return response;
+        bb.on('file', async (fieldname, file, filename, encoding, mimetype) => {
+
+            console.log(filename, req.headers['content-type'], req.headers['content-length'])
+
+            const fileExtension = filename.split('.')[1]
+            const contentLength = parseInt(req.headers['content-length'])
+
+            console.log('file extension: '+fileExtension)
+            console.log('content length: '+ parseInt(req.headers['content-length']))
+
+            const command = new PutObjectCommand({
+                Body: file,
+                Bucket: BUCKET,
+                Key: filename,
+                ContentType: `image/${fileExtension}`,
+                ContentLength: contentLength
+            });
+
+            
+            try{
+                const response = await s3.send(command);
+                console.log(JSON.stringify(response))
+
+                return response;
+            }catch(err){
+                console.log("Error: "+JSON.stringify(err));
+            }
+            
+
+            // const url = await getSignedUrl(s3, command, {expiresIn: 3600})
+            // return url;
+        })
+
+        bb.on('finish', function() {
+            console.log('busboy done')
+        });
+
+        req.pipe(bb);
+
     }catch(err){
         console.log("Error: "+JSON.stringify(err));
     }

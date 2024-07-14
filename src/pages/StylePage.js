@@ -93,7 +93,15 @@ function StylePage( props ) {
         const styleInfo = stylePage[0]
         const styleImages = stylePage[1]
 
-        const images = await fetchImages(styleImages)
+        console.log(styleImages)
+
+        let images = []
+
+        if(Object.keys(styleImages).length>0){
+            images = await fetchImages(styleImages)
+        }
+
+        console.log(images)
         
         setCurrentStyle(styleInfo)
         setCurrentStyleImages(images)
@@ -159,6 +167,40 @@ function StylePage( props ) {
             console.log('Response: ' + JSON.stringify(res.data));
 
             console.log("fetch images")
+
+            return res.data;
+        }catch(err){
+            console.log('Error: ' + JSON.stringify(err.message));
+        }finally{
+            //setImageLoading(false);
+        }
+    }
+
+    const fetchImageFiles = async(styleImages) => {
+
+        const imageList = []
+
+        for(const [key, value] of Object.entries(styleImages)){
+            imageList.push(value.FileName)
+        }
+
+        console.log(JSON.stringify(imageList))
+
+        try{
+            const res = await axios.get(
+                (BACKEND_URL_STYLES + '/getFiles'),
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    },
+                    params: {
+                        images: imageList
+                    }
+                }
+            )
+            console.log('Response: ' + JSON.stringify(res.data));
+
+            console.log("fetch images files")
 
             return res.data;
         }catch(err){

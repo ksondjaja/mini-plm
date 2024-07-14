@@ -114,17 +114,28 @@ function StyleInfo( props ){
         event.preventDefault();
 
         const timestamp = Date.now();
-        const formData = new FormData();
+
+        console.log(filesToUpload);
 
         const fileExtension = filesToUpload.name.split('.')[1]
 
+        const formData = new FormData()
+        
+
         formData.append(
-            `STY${styleid}_IMG${timestamp}`,
+            'file',
             filesToUpload,
             `STY${styleid}_IMG${timestamp}.${fileExtension}`
         )
 
-        const imageFile = [formData, `STY${styleid}_IMG${timestamp}.${fileExtension}`, fileExtension]
+        //const imageFile = [Readable.from(encoder), `STY${styleid}_IMG${timestamp}.${fileExtension}`, fileExtension]
+
+        // const imageFile = {
+        //     Body: formData,
+        //     Key: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
+        //     Type: fileExtension,
+        //     Length: filesToUpload.size
+        // }
 
         const imageData = {
             StyleId: styleid,
@@ -137,7 +148,7 @@ function StyleInfo( props ){
             }
         }
 
-        submitFileUpload(imageFile)
+        submitFileUpload(formData)
         submitImageInfo(imageData)
     }
 
@@ -179,8 +190,8 @@ function StyleInfo( props ){
                 }
             )
             console.log('Response: ' + JSON.stringify(res.data));
-            setOpenUploadDialog(false)
-            navigate(0);
+            //setOpenUploadDialog(false)
+            //navigate(0);
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }
@@ -266,15 +277,18 @@ function StyleInfo( props ){
 
             <Grid container display="flex" justifyContent="stretch" spacing={2}>
                 <Grid item sm={6} display="flex" flexDirection="column">
-                    {Object.keys(styleImages).length>0 && !imageLoading && loadedImages &&
+                    {/* <p>{styleImages}</p> */}
+
+
+
+                    {Object.keys(styleImages).length>0 && !imageLoading &&
 
                         <>
-                        {loadedImages.map((image, i)=>{
-                            <Box sx={{ height: "100%", mb: 2}}>
-                                <p>{JSON.stringify(image)}</p>
+                        {styleImages.map((image, i)=>
+                            // <Box key={i} sx={{ height: "100%", mb: 2}}>
                                 <img src={image} style={{ width: '100%'}}/>
-                            </Box>
-                        })}
+                            //</Box>
+                        )}
                         </>
                     }
 
