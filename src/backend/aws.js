@@ -2,7 +2,6 @@
 // https://www.youtube.com/watch?v=_DRklnnJbig&ab_channel=WebDevCody
 
 const AWS = require('aws-sdk');
-const Busboy = require('busboy');
 
 const variables = require('dotenv').config({ path: '../../.env.local' });
 
@@ -43,6 +42,7 @@ const { S3Client,
     PutObjectCommand,
     GetObjectCommand
 } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const BUCKET = process.env.AWS_BUCKET_NAME
@@ -87,55 +87,25 @@ const getFile = async (params) => {
     }
 }
 
-// Upload image to S3 bucket
-const uploadFile = async (req) => {
+// Upload image to S3 bucket through Signed URL
+const uploadFile = async (params) => {
 
-    const bb = new Busboy({ headers: req.headers })
+    const command = new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: params.imageName,
+        Body: params.imageFile,
+        ContentType: params.contentType,
+        ContentLength: params.contentLength
+    })
 
-    // S3 keeps giving timeout error, why???
     try{
-        bb.on('file', async (fieldname, file, filename, encoding, mimetype) => {
-
-            console.log(filename, req.headers['content-type'], req.headers['content-length'])
-
-            const fileExtension = filename.split('.')[1]
-            const contentLength = parseInt(req.headers['content-length'])
-
-            console.log('file extension: '+fileExtension)
-            console.log('content length: '+ parseInt(req.headers['content-length']))
-
-            const command = new PutObjectCommand({
-                Body: file,
-                Bucket: BUCKET,
-                Key: filename,
-                ContentType: `image/${fileExtension}`,
-                ContentLength: contentLength
-            });
-
-            
-            try{
-                const response = await s3.send(command);
-                console.log(JSON.stringify(response))
-
-                return response;
-            }catch(err){
-                console.log("Error: "+JSON.stringify(err));
-            }
-            
-
-            // const url = await getSignedUrl(s3, command, {expiresIn: 3600})
-            // return url;
-        })
-
-        bb.on('finish', function() {
-            console.log('busboy done')
-        });
-
-        req.pipe(bb);
+        const response = await s3.send(command);
+        return response;
 
     }catch(err){
         console.log("Error: "+JSON.stringify(err));
     }
+
 }
 
 

@@ -123,19 +123,10 @@ function StyleInfo( props ){
         
 
         formData.append(
-            'file',
+            "image",
             filesToUpload,
             `STY${styleid}_IMG${timestamp}.${fileExtension}`
         )
-
-        //const imageFile = [Readable.from(encoder), `STY${styleid}_IMG${timestamp}.${fileExtension}`, fileExtension]
-
-        // const imageFile = {
-        //     Body: formData,
-        //     Key: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
-        //     Type: fileExtension,
-        //     Length: filesToUpload.size
-        // }
 
         const imageData = {
             StyleId: styleid,
@@ -163,7 +154,8 @@ function StyleInfo( props ){
                 imageFile,
                 {
                     headers: {
-                        Authorization: 'Bearer ' + token
+                        Authorization: 'Bearer ' + token,
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
             )

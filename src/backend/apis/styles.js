@@ -1,7 +1,24 @@
+// DynamoDB with Express tutorial
 // https://tapiwanashekanda.hashnode.dev/how-to-create-a-crud-api-using-expressjs-and-aws-dynamodb
+// S3 with Node JS & Multer tutorial
+// https://www.youtube.com/watch?v=eQAIojcArRY&ab_channel=SamMeech-Ward
 
+
+// Set up Express
 const express = require('express');
 
+const router = express.Router();
+router.use(express.json())
+
+
+// Set up Multer
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage})
+
+
+// methods to communicate with AWS
 const { 
     getImageSignedURL,
     getFile,
@@ -20,9 +37,6 @@ const {
     deleteSpecRow
 } = require('../aws');
 
-const router = express.Router();
-
-router.use(express.json())
 
 // Get image signed URL to view from S3 Bucket
 router.get('/viewImages', async (req,res) => {
@@ -69,10 +83,19 @@ router.get('/getFiles', async (req,res) => {
 })
 
 // Upload image to S3 Bucket
-router.post('/uploadFile', async (req,res) => {
+router.post('/uploadFile', upload.single("image"), async (req,res) => {
 
+    console.log(req.body.name)
+
+    const params ={
+        imageFile: req.file.buffer,
+        imageName: req.file.originalname,
+        contentType: req.file.mimetype,
+        contentLength: req.file.size
+    }
+    
     try{
-        const uploadedFile = await uploadFile(req);
+        const uploadedFile = await uploadFile(params);
         res.json(uploadedFile);
         console.log('uploaded')
     } catch(err){

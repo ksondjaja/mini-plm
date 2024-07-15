@@ -189,33 +189,32 @@ function UploadImageDialog (props){
                     </Grid>
                     
                     <Box sx={{ mt: 3}}>
-                        <input
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            id="upload-file-button"
-                            multiple
-                            type="file"
-                            onChange={handleFileSelect}
-                        />
-                        <label htmlFor="upload-file-button">
-                            {filesToUpload === null ? 
-                                <Button variant="contained" component="span">
-                                    Select Image File
+                            <input
+                                name="image"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                id="upload-file-button"
+                                multiple
+                                type="file"
+                                onChange={handleFileSelect}
+                            />
+                            <Box display="flex" flexDirection="row" justifyContent="center">
+                                <label htmlFor="upload-file-button">
+                                    {filesToUpload === null ? 
+                                        <Button variant="contained" component="span">
+                                            Select Image File
+                                        </Button>
+                                    :
+                                        
+                                        <Button variant="outlined" component="span" sx={{ mx: 5}}>
+                                            Change Image File
+                                        </Button>
+                                    }
+                                </label>
+                                <Button variant="contained" sx={{ mx: 5}} onClick={handleFileUpload}>
+                                    Upload File
                                 </Button>
-                            :
-                                <Box display="flex" flexDirection="row" justifyContent="center">
-                                    <Button variant="outlined" component="span" sx={{ mx: 5}}>
-                                        Change Image File
-                                    </Button>
-
-                                    <Button variant="contained" sx={{ mx: 5}} onClick={handleFileUpload}>
-                                        Upload File
-                                    </Button>
-
-                                </Box>
-                            }
-                            
-                        </label>
+                            </Box>
                     </Box>
                 </DialogContent>
             </Box>
