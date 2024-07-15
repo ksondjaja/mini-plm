@@ -13,7 +13,9 @@ import {
     Button,
     Dialog,
     DialogTitle,
-    DialogContent
+    DialogContent,
+    TextField,
+    CardMedia
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -34,6 +36,8 @@ function StyleInfo( props ){
     const [filesToUpload, setFilesToUpload] = useState(null);
     const [imagesToUpload, setImagesToUpload] = useState(null);
     const [imagesInfo, setImagesInfo] = useState(null)
+
+    const [displayedImage, setDisplayedImage] = useState((Object.keys(styleImages).length>0) ? 0 : null)
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
@@ -161,7 +165,7 @@ function StyleInfo( props ){
             )
             console.log('Response: ' + JSON.stringify(res.data));
             //setOpenUploadDialog(false)
-            //navigate(0);
+            navigate(0);
         }catch(err){
             console.log('Error: ' + JSON.stringify(err.message));
         }
@@ -267,8 +271,8 @@ function StyleInfo( props ){
             </Grid>
 
 
-            <Grid container display="flex" justifyContent="stretch" spacing={2}>
-                <Grid item sm={6} display="flex" flexDirection="column">
+            <Grid container display="flex" justifyContent="stretch" spacing={3}>
+                <Grid item sm={6} display="flex" flexDirection="column" justifyContent="center">
                     {/* <p>{styleImages}</p> */}
 
 
@@ -276,24 +280,69 @@ function StyleInfo( props ){
                     {Object.keys(styleImages).length>0 && !imageLoading &&
 
                         <>
-                        {styleImages.map((image, i)=>
-                            // <Box key={i} sx={{ height: "100%", mb: 2}}>
-                                <img src={image} style={{ width: '100%'}}/>
-                            //</Box>
-                        )}
+                        <Box
+                            display = 'flex'
+                            justifyContent='center'
+                            sx={{ maxHeight: '35vh', mb: 2, p: 3, border: '1px solid black'}}
+                        >
+                            <img src={styleImages[displayedImage]} style={{ height: '100%'}}/>
+                        </Box>
+                        <Grid container spacing={4} mb={5}
+                            display="flex" flexDirection="row" justifyContent="stretch" alignItems="stretch" 
+                            sx={{height: '100%'}}
+                        >
+                            {styleImages.map((image, i)=>
+                                <Grid item sm={3} key={i}>
+                                    <Box
+                                    display = 'block'
+                                    position = 'relative'
+                                    sx={{ paddingBottom: '100%'}}
+                                    >
+                                    <CardMedia
+                                        component={"img"}
+                                        src={image}
+                                        sx={{ position: 'absolute',
+                                            left: 0, top: 0,
+                                            p: 1, height: '100%', objectFit: 'contain',
+                                            border: i===displayedImage? '3px #1976d2 solid' : '1px black solid'
+                                        }}
+                                        onClick={()=>setDisplayedImage(i)}
+                                    />
+                                    </Box>
+                                </Grid>
+                            )}
+                            <Grid item sm={3}>
+                                    <Box
+                                    display = 'block'
+                                    position = 'relative'
+                                    sx={{ paddingBottom: '100%'}}
+                                    >
+                                        <Button variant="contained" component="span"
+                                            sx={{ textAlign: 'center', position: 'absolute', left: 0, top: 0,
+                                                height: '115%', objectFit: 'contain'
+                                            }}
+                                            onClick={()=>setOpenUploadDialog(true)}
+                                        >
+                                            Upload Image
+                                        </Button>
+                                    </Box>
+                            </Grid>
+                        </Grid>
                         </>
                     }
 
                     {Object.keys(styleImages).length===0 &&
                     <>
                         <Box sx={{ height: "100%", bgcolor: "black", mb: 2}} />
+
+                        <Box>
+                            <Button variant="contained" component="span" onClick={()=>setOpenUploadDialog(true)}>
+                                Upload Image
+                            </Button>
+                        </Box>
                     </>
                     }
-                    <Box>
-                        <Button variant="contained" component="span" onClick={()=>setOpenUploadDialog(true)}>
-                            Upload Image
-                        </Button>
-                    </Box>
+                    
                 </Grid>
 
                 <Grid item sm={6}>
@@ -303,7 +352,7 @@ function StyleInfo( props ){
                         <>
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="primary">
-                                    {styleDetails.Season}
+                                    {styleDetails.Season} {moment(styleDetails.DeliveryDate.slice(0,10)).format('YYYY')} - {styleDetails.Category}
                                 </Typography>
                             </Grid>
 
@@ -395,15 +444,19 @@ function StyleInfo( props ){
                             </Grid>
 
                             <Grid item xs={12}>
-                                <StyleAttribute
-                                    textSize="24px"
-                                    textColor="#1976d2"
-                                    attribute="Style Name"
-                                    text={editValues.StyleName}
-                                    sx={{ width: '90%'}}
-                                    bold
-                                    onChange={handleEditChange}
-                                />
+                                <Box px={1}>
+                                    <TextField
+                                        variant="standard"
+                                        label='Style Name'
+                                        name='StyleName'
+                                        value={editValues.StyleName}
+                                        InputProps={{
+                                            style: { fontSize: '24px', color: '#1976d2', fontWeight: 'bold'}
+                                        }}
+                                        onChange={handleEditChange}
+                                        fullWidth
+                                    />
+                                </Box>
                             </Grid>
 
                             <Grid container mt={2} mb={2} display="flex">
