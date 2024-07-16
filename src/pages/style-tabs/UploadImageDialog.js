@@ -30,8 +30,8 @@ function UploadImageDialog (props){
         setFilesToUpload,
         imagesToUpload,
         setImagesToUpload,
-        imagesInfo,
-        setImagesInfo,
+        imagesInfoToUpload,
+        setImagesInfoToUpload,
         handleFileUpload } = props;
 
     const imageTags = ["Design Sketch", "Colors", "Graphic", "Material", "Construction", "Reference"]
@@ -41,8 +41,8 @@ function UploadImageDialog (props){
     const handleImageInfoChange = event => {
         const value = event.target.value
   
-        setImagesInfo({
-          ...imagesInfo,
+        setImagesInfoToUpload({
+          ...imagesInfoToUpload,
         [event.target.name]: value
         });
     }
@@ -61,8 +61,9 @@ function UploadImageDialog (props){
 
         setFilesToUpload(file)
 
-        setImagesInfo({
-            ImageTitle: file.name
+        setImagesInfoToUpload({
+            ImageTitle: (file.name).split('.')[0],
+            ImageTag: 'Design Sketch'
         })
 
         // let fileObject = []
@@ -147,7 +148,7 @@ function UploadImageDialog (props){
                                         id="image-title"
                                         label="Title"
                                         name="ImageTitle"
-                                        value={imagesInfo.ImageTitle?? ''}
+                                        value={imagesInfoToUpload.ImageTitle?? ''}
                                         onChange={handleImageInfoChange}
                                         fullWidth
                                         sx={{mb: 2}}
@@ -157,7 +158,7 @@ function UploadImageDialog (props){
                                     <TextField
                                         labelId="select-image-tag"
                                         id="image-tag"
-                                        value={imagesInfo.ImageTag?? imageTags[0]}
+                                        value={imagesInfoToUpload.ImageTag?? imageTags[0]}
                                         label="Tag"
                                         name="ImageTag"
                                         onChange={handleImageInfoChange}
@@ -176,7 +177,7 @@ function UploadImageDialog (props){
                                         id="image-notes"
                                         label="Notes"
                                         name="ImageNotes"
-                                        value={imagesInfo.ImageNotes?? ''}
+                                        value={imagesInfoToUpload.ImageNotes?? ''}
                                         onChange={handleImageInfoChange}
                                         fullWidth
                                         multiline

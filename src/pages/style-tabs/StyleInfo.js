@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import moment from 'moment';
 import dayjs from 'dayjs';
+import ImagePreview from './ImagePreview';
 import { 
     StyleAttribute
 } from "core";
@@ -15,7 +16,8 @@ import {
     DialogTitle,
     DialogContent,
     TextField,
-    CardMedia
+    CardMedia,
+    IconButton
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -24,20 +26,19 @@ import {
     DatePicker
 } from '@mui/x-date-pickers/';
 import UploadImageDialog from './UploadImageDialog';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 
 
 function StyleInfo( props ){
 
-    const { styleid, styleDetails, styleImages, imageLoading, loadedImages, token } = props;
+    const { styleid, styleDetails, styleImages, imagesInfo, imageLoading, loadedImages, token } = props;
 
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openUploadDialog, setOpenUploadDialog] = useState(false)
 
     const [filesToUpload, setFilesToUpload] = useState(null);
     const [imagesToUpload, setImagesToUpload] = useState(null);
-    const [imagesInfo, setImagesInfo] = useState(null)
-
-    const [displayedImage, setDisplayedImage] = useState((Object.keys(styleImages).length>0) ? 0 : null)
+    const [imagesInfoToUpload, setImagesInfoToUpload] = useState(null)
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
@@ -137,9 +138,9 @@ function StyleInfo( props ){
             ImageId:  `IMG${timestamp}`,
             ImageInfo: {
                 FileName: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
-                Title: imagesInfo.ImageTitle,
-                Tag: imagesInfo.ImageTag,
-                Notes: imagesInfo.ImageNotes
+                Title: imagesInfoToUpload.ImageTitle,
+                Tag: imagesInfoToUpload.ImageTag,
+                Notes: imagesInfoToUpload.ImageNotes
             }
         }
 
@@ -235,8 +236,8 @@ function StyleInfo( props ){
             handleFileUpload = {handleFileUpload}
             imagesToUpload = {imagesToUpload}
             setImagesToUpload = {setImagesToUpload}
-            imagesInfo = {imagesInfo}
-            setImagesInfo = {setImagesInfo}
+            imagesInfoToUpload = {imagesInfoToUpload}
+            setImagesInfoToUpload = {setImagesInfoToUpload}
         />
 
             <Grid container mb={3}>
@@ -273,75 +274,14 @@ function StyleInfo( props ){
 
             <Grid container display="flex" justifyContent="stretch" spacing={3}>
                 <Grid item sm={6} display="flex" flexDirection="column" justifyContent="center">
-                    {/* <p>{styleImages}</p> */}
 
-
-
-                    {Object.keys(styleImages).length>0 && !imageLoading &&
-
-                        <>
-                        <Box
-                            display = 'flex'
-                            justifyContent='center'
-                            sx={{ maxHeight: '35vh', mb: 2, p: 3, border: '1px solid black'}}
-                        >
-                            <img src={styleImages[displayedImage]} style={{ height: '100%'}}/>
-                        </Box>
-                        <Grid container spacing={4} mb={5}
-                            display="flex" flexDirection="row" justifyContent="stretch" alignItems="stretch" 
-                            sx={{height: '100%'}}
-                        >
-                            {styleImages.map((image, i)=>
-                                <Grid item sm={3} key={i}>
-                                    <Box
-                                    display = 'block'
-                                    position = 'relative'
-                                    sx={{ paddingBottom: '100%'}}
-                                    >
-                                    <CardMedia
-                                        component={"img"}
-                                        src={image}
-                                        sx={{ position: 'absolute',
-                                            left: 0, top: 0,
-                                            p: 1, height: '100%', objectFit: 'contain',
-                                            border: i===displayedImage? '3px #1976d2 solid' : '1px black solid'
-                                        }}
-                                        onClick={()=>setDisplayedImage(i)}
-                                    />
-                                    </Box>
-                                </Grid>
-                            )}
-                            <Grid item sm={3}>
-                                    <Box
-                                    display = 'block'
-                                    position = 'relative'
-                                    sx={{ paddingBottom: '100%'}}
-                                    >
-                                        <Button variant="contained" component="span"
-                                            sx={{ textAlign: 'center', position: 'absolute', left: 0, top: 0,
-                                                height: '115%', objectFit: 'contain'
-                                            }}
-                                            onClick={()=>setOpenUploadDialog(true)}
-                                        >
-                                            Upload Image
-                                        </Button>
-                                    </Box>
-                            </Grid>
-                        </Grid>
-                        </>
-                    }
-
-                    {Object.keys(styleImages).length===0 &&
-                    <>
-                        <Box sx={{ height: "100%", bgcolor: "black", mb: 2}} />
-
-                        <Box>
-                            <Button variant="contained" component="span" onClick={()=>setOpenUploadDialog(true)}>
-                                Upload Image
-                            </Button>
-                        </Box>
-                    </>
-                    }
+                    <ImagePreview
+                        styleImages = {styleImages}
+                        imagesInfo = {imagesInfo}
+                        imageLoading = {imageLoading}
+                        openUploadDialog = {openUploadDialog}
+                        setOpenUploadDialog = {setOpenUploadDialog}
+                    />
                     
                 </Grid>
 

@@ -23,6 +23,7 @@ function StylePage( props ) {
 
     const [currentStyle, setCurrentStyle] = useState();
     const [currentStyleImages, setCurrentStyleImages] = useState();
+    const [currentImagesInfo, setCurrentImagesInfo] = useState();
     const [loadedImages, setLoadedImages] = useState();
 
     const [loading, setLoading] = useState(true);
@@ -100,11 +101,10 @@ function StylePage( props ) {
         if(Object.keys(styleImages).length>0){
             images = await fetchImages(styleImages)
         }
-
-        console.log(images)
         
-        setCurrentStyle(styleInfo)
-        setCurrentStyleImages(images)
+        setCurrentStyle(styleInfo);
+        setCurrentStyleImages(images);
+        setCurrentImagesInfo(Object.values(styleImages));
     }
 
 
@@ -150,7 +150,7 @@ function StylePage( props ) {
             imageList.push(value.FileName)
         }
 
-        console.log(JSON.stringify(imageList))
+        //console.log(JSON.stringify(imageList))
 
         try{
             const res = await axios.get(
@@ -335,6 +335,7 @@ function StylePage( props ) {
                                 styleid={styleid}
                                 styleDetails = {currentStyle}
                                 styleImages = {currentStyleImages}
+                                imagesInfo = {currentImagesInfo}
                                 loadedImages = {loadedImages}
                                 imageLoading = {imageLoading}
                                 token = {token}
