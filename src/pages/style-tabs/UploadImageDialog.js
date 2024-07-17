@@ -23,20 +23,23 @@ function UploadImageDialog (props){
 
     //https://www.geeksforgeeks.org/file-uploading-in-react-js/
     //https://stackoverflow.com/questions/74536534/react-js-how-to-upload-image-with-preview-and-display-the-processe-image
-
-    const { openUploadDialog,
+    
+    const BACKEND_URL_STYLES = process.env.REACT_APP_BACKEND_URL_STYLES;
+    const navigate = useNavigate();
+    
+    const { token,
+        styleid,
+        openUploadDialog,
         setOpenUploadDialog,
-        filesToUpload,
-        setFilesToUpload,
-        imagesToUpload,
-        setImagesToUpload,
-        imagesInfoToUpload,
-        setImagesInfoToUpload,
-        handleFileUpload } = props;
+        } = props;
 
     const imageTags = ["Design Sketch", "Colors", "Graphic", "Material", "Construction", "Reference"]
 
     const [previewImages, setPreviewImages] = useState([]);
+
+    const [filesToUpload, setFilesToUpload] = useState(null);
+    const [imagesToUpload, setImagesToUpload] = useState(null);
+    const [imagesInfoToUpload, setImagesInfoToUpload] = useState(null)
 
     const handleImageInfoChange = event => {
         const value = event.target.value
@@ -99,6 +102,87 @@ function UploadImageDialog (props){
         //     })
         //   }
     }
+
+        // Submit Image files to backend/database/bucket
+        const handleFileUpload = event => {
+
+            event.preventDefault();
+    
+            const timestamp = Date.now();
+    
+            console.log(filesToUpload);
+    
+            const fileExtension = filesToUpload.name.split('.')[1]
+    
+            const formData = new FormData()
+            
+    
+            formData.append(
+                "image",
+                filesToUpload,
+                `STY${styleid}_IMG${timestamp}.${fileExtension}`
+            )
+    
+            const imageData = {
+                StyleId: styleid,
+                ImageId:  `IMG${timestamp}`,
+                ImageInfo: {
+                    FileName: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
+                    Title: imagesInfoToUpload.ImageTitle,
+                    Tag: imagesInfoToUpload.ImageTag,
+                    Notes: imagesInfoToUpload.ImageNotes
+                }
+            }
+    
+            submitFileUpload(formData)
+            submitImageInfo(imageData)
+        }
+    
+    
+        // Upload image to S3 bucket
+        // Figure out how to upload multiple files & show preview
+        const submitFileUpload = async(imageFile) => {
+    
+            try{
+                const res = await axios.post(
+                    (BACKEND_URL_STYLES + '/uploadFile'),
+                    imageFile,
+                    {
+                        headers: {
+                            Authorization: 'Bearer ' + token,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                )
+                console.log('Response: ' + JSON.stringify(res.data));
+                //setOpenUploadDialog(false)
+                navigate(0);
+            }catch(err){
+                console.log('Error: ' + JSON.stringify(err.message));
+            }
+    
+        };
+    
+        // Record image file names & info in database
+    
+        const submitImageInfo = async(imageInfo) => {
+            try{
+                const res = await axios.post(
+                    (BACKEND_URL_STYLES + '/addImageInfo'),
+                    imageInfo,
+                    {
+                        headers: {
+                            Authorization: 'Bearer ' + token
+                        }
+                    }
+                )
+                console.log('Response: ' + JSON.stringify(res.data));
+                //setOpenUploadDialog(false)
+                //navigate(0);
+            }catch(err){
+                console.log('Error: ' + JSON.stringify(err.message));
+            }
+        }
 
 
 

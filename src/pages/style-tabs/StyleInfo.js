@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import moment from 'moment';
@@ -16,8 +16,6 @@ import {
     DialogTitle,
     DialogContent,
     TextField,
-    CardMedia,
-    IconButton
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -26,7 +24,6 @@ import {
     DatePicker
 } from '@mui/x-date-pickers/';
 import UploadImageDialog from './UploadImageDialog';
-import OpenInNew from '@mui/icons-material/OpenInNew';
 
 
 function StyleInfo( props ){
@@ -35,10 +32,6 @@ function StyleInfo( props ){
 
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openUploadDialog, setOpenUploadDialog] = useState(false)
-
-    const [filesToUpload, setFilesToUpload] = useState(null);
-    const [imagesToUpload, setImagesToUpload] = useState(null);
-    const [imagesInfoToUpload, setImagesInfoToUpload] = useState(null)
 
     const [editMode, setEditMode] = useState(false);
     const [editValues, setEditValues] = useState(styleDetails)
@@ -113,87 +106,6 @@ function StyleInfo( props ){
         }
     }
 
-    // Submit Image files to backend/database/bucket
-    const handleFileUpload = event => {
-
-        event.preventDefault();
-
-        const timestamp = Date.now();
-
-        console.log(filesToUpload);
-
-        const fileExtension = filesToUpload.name.split('.')[1]
-
-        const formData = new FormData()
-        
-
-        formData.append(
-            "image",
-            filesToUpload,
-            `STY${styleid}_IMG${timestamp}.${fileExtension}`
-        )
-
-        const imageData = {
-            StyleId: styleid,
-            ImageId:  `IMG${timestamp}`,
-            ImageInfo: {
-                FileName: `STY${styleid}_IMG${timestamp}.${fileExtension}`,
-                Title: imagesInfoToUpload.ImageTitle,
-                Tag: imagesInfoToUpload.ImageTag,
-                Notes: imagesInfoToUpload.ImageNotes
-            }
-        }
-
-        submitFileUpload(formData)
-        submitImageInfo(imageData)
-    }
-
-
-    // Upload image to S3 bucket
-    // Figure out how to upload multiple files & show preview
-    const submitFileUpload = async(imageFile) => {
-
-        try{
-            const res = await axios.post(
-                (BACKEND_URL_STYLES + '/uploadFile'),
-                imageFile,
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            )
-            console.log('Response: ' + JSON.stringify(res.data));
-            //setOpenUploadDialog(false)
-            navigate(0);
-        }catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-        }
-
-    };
-
-    // Record image file names & info in database
-
-    const submitImageInfo = async(imageInfo) => {
-        try{
-            const res = await axios.post(
-                (BACKEND_URL_STYLES + '/addImageInfo'),
-                imageInfo,
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token
-                    }
-                }
-            )
-            console.log('Response: ' + JSON.stringify(res.data));
-            //setOpenUploadDialog(false)
-            //navigate(0);
-        }catch(err){
-            console.log('Error: ' + JSON.stringify(err.message));
-        }
-    }
-
     return(
         <>
         <Dialog
@@ -229,15 +141,10 @@ function StyleInfo( props ){
         </Dialog>
 
         <UploadImageDialog
+            token = {token}
+            styleid = {styleid}
             openUploadDialog = {openUploadDialog}
             setOpenUploadDialog = {setOpenUploadDialog}
-            filesToUpload = {filesToUpload}
-            setFilesToUpload = {setFilesToUpload}
-            handleFileUpload = {handleFileUpload}
-            imagesToUpload = {imagesToUpload}
-            setImagesToUpload = {setImagesToUpload}
-            imagesInfoToUpload = {imagesInfoToUpload}
-            setImagesInfoToUpload = {setImagesInfoToUpload}
         />
 
             <Grid container mb={3}>
@@ -272,7 +179,7 @@ function StyleInfo( props ){
             </Grid>
 
 
-            <Grid container display="flex" justifyContent="stretch" spacing={3}>
+            <Grid container display="flex" justifyContent="center" spacing={3}>
                 <Grid item sm={6} display="flex" flexDirection="column" justifyContent="center">
 
                     <ImagePreview

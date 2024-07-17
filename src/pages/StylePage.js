@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 import StyleInfo from './style-tabs/StyleInfo';
+import StyleImages from './style-tabs/StyleImages';
 import StyleSamples from './style-tabs/StyleSamples';
 import StyleSpecs from "./style-tabs/StyleSpecs";
 import { 
@@ -343,6 +344,21 @@ function StylePage( props ) {
                             />
                         }
                     />
+
+                    <Route
+                        path = "/images"
+                        element = {
+                            <StyleImages
+                                styleid={styleid}
+                                styleImages = {currentStyleImages}
+                                imagesInfo = {currentImagesInfo}
+                                loadedImages = {loadedImages}
+                                imageLoading = {imageLoading}
+                                token = {token}
+                            />
+                        }
+                    />
+
                     <Route
                         path = "/samples"
                         element = {
